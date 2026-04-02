@@ -1,0 +1,106 @@
+<div th:fragment="tab-datos" id="tab-datos" class="tab-pane fade show active">
+
+
+    <div class="hd-card">
+        <div class="hd-card-header">
+            <div class="hd-card-header-icon"><i class="bi bi-person-fill"></i></div>
+            <div>
+                <h6>Información del Paciente</h6>
+                <small>Datos personales y médicos básicos</small>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-teal ms-auto" data-bs-toggle="collapse" data-bs-target="#editFormCollapse">
+                <i class="bi bi-pencil"></i> Editar
+            </button>
+        </div>
+        <div class="hd-card-body">
+            <div class="row g-2">
+                <div class="col-6 col-md-4"><dl class="hd-info mb-0"><dt>DNI</dt><dd th:text="${patient.dni}">-</dd></dl></div>
+                <div class="col-6 col-md-4"><dl class="hd-info mb-0"><dt>Nombres</dt><dd th:text="${patient.firstName}">-</dd></dl></div>
+                <div class="col-6 col-md-4"><dl class="hd-info mb-0"><dt>Apellidos</dt><dd th:text="${patient.lastName}">-</dd></dl></div>
+                <div class="col-6 col-md-4"><dl class="hd-info mb-0"><dt>Género</dt><dd th:text="${patient.genderLabel} ?: '-'">-</dd></dl></div>
+                <div class="col-6 col-md-4"><dl class="hd-info mb-0"><dt>Fecha Nacimiento</dt><dd th:text="${patient.birthDateFormatted} ?: '-'">-</dd></dl></div>
+                <div class="col-6 col-md-4"><dl class="hd-info mb-0"><dt>Edad</dt><dd th:text="${patient.effectiveAge != null ? patient.effectiveAge + ' años' : '-'}">-</dd></dl></div>
+                <div class="col-6 col-md-4"><dl class="hd-info mb-0"><dt>Teléfono</dt><dd th:text="${patient.phone} ?: '-'">-</dd></dl></div>
+                <div class="col-6 col-md-4"><dl class="hd-info mb-0"><dt>Email</dt><dd th:text="${patient.email} ?: '-'">-</dd></dl></div>
+                <div class="col-6 col-md-4"><dl class="hd-info mb-0"><dt>Distrito</dt><dd th:text="${patient.district} ?: '-'">-</dd></dl></div>
+                <div class="col-6 col-md-4"><dl class="hd-info mb-0"><dt>Dirección</dt><dd th:text="${patient.address} ?: '-'">-</dd></dl></div>
+                <div class="col-6 col-md-4"><dl class="hd-info mb-0"><dt>Tel. Emergencia</dt><dd th:text="${patient.emergencyPhone} ?: '-'">-</dd></dl></div>
+                <div class="col-6 col-md-4"><dl class="hd-info mb-0"><dt>Alergias</dt><dd th:text="${patient.allergies} ?: 'Ninguna'">-</dd></dl></div>
+                <div class="col-12" th:if="${patient.medicalNotes}"><dl class="hd-info mb-0"><dt>Notas Médicas</dt><dd th:text="${patient.medicalNotes}">-</dd></dl></div>
+                <div class="col-12" th:if="${patient.dentalHistory}"><dl class="hd-info mb-0"><dt>Historial Odontológico Previo</dt><dd th:text="${patient.dentalHistory}">-</dd></dl></div>
+            </div>
+
+            <div th:if="${patient.minor}" class="mt-3">
+                <div class="hd-section rose" style="margin-top:12px;">
+                    <div class="hd-section-icon"><i class="bi bi-people-fill"></i></div>
+                    <span class="hd-section-text">Apoderado / Responsable</span>
+                    <div class="hd-section-line"></div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-6"><dl class="hd-info mb-0"><dt>Nombre Apoderado</dt><dd th:text="${patient.guardianName} ?: 'No registrado'">-</dd></dl></div>
+                    <div class="col-6"><dl class="hd-info mb-0"><dt>Tel. Apoderado</dt><dd th:text="${patient.guardianPhone} ?: '-'">-</dd></dl></div>
+                </div>
+            </div>
+
+            <div class="hd-audit mt-3">
+                <span th:if="${patient.createdAtFormatted}"><i class="bi bi-calendar3"></i> Registrado: <strong th:text="${patient.createdAtFormatted}"></strong></span>
+                <span th:if="${patient.updatedAtFormatted}"><i class="bi bi-arrow-repeat"></i> Actualizado: <strong th:text="${patient.updatedAtFormatted}"></strong></span>
+                <span th:if="${patient.createdBy}"><i class="bi bi-person"></i> Por: <strong th:text="${patient.createdBy}"></strong></span>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="collapse mt-3" id="editFormCollapse">
+        <div class="hd-card">
+            <div class="hd-card-header">
+                <div class="hd-card-header-icon"><i class="bi bi-pencil-square"></i></div>
+                <div><h6>Editar Datos del Paciente</h6><small>Modifique los campos que desea actualizar</small></div>
+            </div>
+            <div class="hd-card-body">
+                <form th:action="@{'/patient/' + ${patient.idPatient} + '/edit'}" method="post">
+                    <div class="hd-section"><div class="hd-section-icon"><i class="bi bi-person-fill"></i></div><span class="hd-section-text">Datos Personales</span><div class="hd-section-line"></div></div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-6"><label class="hd-label">Nombres <span class="req">*</span></label><input type="text" name="firstName" class="hd-input" th:value="${patient.firstName}" required></div>
+                        <div class="col-md-6"><label class="hd-label">Apellidos <span class="req">*</span></label><input type="text" name="lastName" class="hd-input" th:value="${patient.lastName}" required></div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-3"><label class="hd-label">Género</label><select name="gender" class="hd-input"><option value="">— Sin especificar —</option><option value="M" th:selected="${patient.gender == 'M'}">Masculino</option><option value="F" th:selected="${patient.gender == 'F'}">Femenino</option></select></div>
+                        <div class="col-md-3"><label class="hd-label">Fecha Nac.</label><input type="date" name="birthDate" id="editBirthDate" class="hd-input" th:value="${patient.birthDate}" onchange="editCalcAge()"></div>
+                        <div class="col-md-2"><label class="hd-label">Edad</label><input type="number" name="age" id="editAgeInput" class="hd-input" min="0" max="150" th:value="${patient.effectiveAge}"></div>
+                        <div class="col-md-4"><label class="hd-label">Distrito</label><input type="text" name="district" class="hd-input" th:value="${patient.district}" placeholder="Ej: Miraflores"></div>
+                    </div>
+
+                    <div class="hd-section" style="margin-top:14px;"><div class="hd-section-icon"><i class="bi bi-telephone-fill"></i></div><span class="hd-section-text">Contacto</span><div class="hd-section-line"></div></div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-4"><label class="hd-label">Teléfono</label><input type="text" name="phone" class="hd-input" th:value="${patient.phone}"></div>
+                        <div class="col-md-4"><label class="hd-label">Email</label><input type="email" name="email" class="hd-input" th:value="${patient.email}"></div>
+                        <div class="col-md-4"><label class="hd-label">Tel. Emergencia</label><input type="text" name="emergencyPhone" class="hd-input" th:value="${patient.emergencyPhone}"></div>
+                    </div>
+                    <div class="mb-2"><label class="hd-label">Dirección</label><input type="text" name="address" class="hd-input" th:value="${patient.address}"></div>
+
+                    <div class="hd-section teal-dark" style="margin-top:14px;"><div class="hd-section-icon"><i class="bi bi-heart-pulse-fill"></i></div><span class="hd-section-text">Información Médica</span><div class="hd-section-line"></div></div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-6"><label class="hd-label">Alergias</label><textarea name="allergies" class="hd-input" rows="2" th:text="${patient.allergies}"></textarea></div>
+                        <div class="col-md-6"><label class="hd-label">Notas Médicas</label><textarea name="medicalNotes" class="hd-input" rows="2" th:text="${patient.medicalNotes}"></textarea></div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="hd-label">Historial Odontológico Previo</label>
+                        <textarea name="dentalHistory" class="hd-input" rows="2" th:text="${patient.dentalHistory}" placeholder="Tratamientos previos, cirugías dentales..."></textarea>
+                    </div>
+
+                    <div class="hd-section rose" style="margin-top:14px;"><div class="hd-section-icon"><i class="bi bi-people-fill"></i></div><span class="hd-section-text">Apoderado / Responsable</span><div class="hd-section-line"></div></div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6"><label class="hd-label">Nombre Apoderado</label><input type="text" name="guardianName" class="hd-input" th:value="${patient.guardianName}"></div>
+                        <div class="col-md-6"><label class="hd-label">Tel. Apoderado</label><input type="text" name="guardianPhone" class="hd-input" th:value="${patient.guardianPhone}"></div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-teal flex-grow-1"><i class="bi bi-check-lg"></i> Guardar Cambios</button>
+                        <button type="button" class="btn btn-secondary" data-bs-toggle="collapse" data-bs-target="#editFormCollapse">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

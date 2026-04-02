@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/base}" lang="es">
+<head>
+    <title>Ver Proforma</title>
+    <link th:href="@{/css/proforma.css}" rel="stylesheet">
+</head>
+<body>
+
+    <div layout:fragment="topbar-title">
+        <i class="bi bi-clipboard-check me-1"></i> <span id="topTitle">Proforma</span>
+    </div>
+
+    <div layout:fragment="topbar-actions">
+        <a th:href="@{/proformas}" class="btn btn-sm btn-outline-secondary rounded-pill">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <div layout:fragment="content">
+        <div class="hd-page">
+
+
+            <div class="pf-view-header" id="pfHeader">
+                <div class="pf-view-header-loading">Cargando proforma...</div>
+            </div>
+
+
+            <div class="pf-instructions" id="pfInstructions" style="display:none;">
+                <i class="bi bi-info-circle me-2"></i>
+                Haz clic en los ítems pendientes para seleccionarlos, luego presiona
+                <strong>"Marcar como realizado"</strong> para registrar con fecha y hora.
+            </div>
+
+
+            <div class="card border-0 shadow-sm rounded-4 mb-3">
+                <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between py-3 px-4 rounded-top-4">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-list-check me-1" style="color:#0F766E;"></i> Detalle</h6>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-secondary rounded-pill" id="viewItemCount">0</span>
+                        <button class="btn btn-sm btn-outline-teal rounded-pill" id="btnAddItem"
+                                onclick="toggleAddItemPanel()">
+                            <i class="bi bi-plus-lg me-1"></i> Agregar ítem
+                        </button>
+                        <button class="btn btn-sm btn-teal rounded-pill" id="btnMarkDone"
+                                onclick="markSelectedDone()" style="display:none;">
+                            <i class="bi bi-check2-all me-1"></i> Marcar como realizado
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div id="pfItemsContainer"></div>
+
+
+                    <div id="addItemPanel" class="p-3 border-top" style="display:none;background:#f8fafc;">
+                        <div class="fw-semibold small mb-2"><i class="bi bi-plus-circle me-1" style="color:#0F766E;"></i> Agregar ítem</div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-5">
+                                <input type="text" id="addItemName" class="form-control form-control-sm" placeholder="Nombre del servicio">
+                            </div>
+                            <div class="col-3">
+                                <input type="text" id="addItemDesc" class="form-control form-control-sm" placeholder="Detalle / pzas">
+                            </div>
+                            <div class="col-2">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text" style="font-size:11px;">S/</span>
+                                    <input type="number" id="addItemPrice" class="form-control" step="0.01" min="0" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <button class="btn btn-teal btn-sm w-100" onclick="addItemToProforma()">
+                                    <i class="bi bi-plus-lg"></i> Agregar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <input type="text" id="addItemSearch" class="form-control form-control-sm"
+                                   placeholder=" O busca en el catálogo..." oninput="searchServiceForAdd(this.value)">
+                        </div>
+                        <div id="addItemResults" style="max-height:150px;overflow-y:auto;"></div>
+                    </div>
+
+                    <div class="d-flex justify-content-end align-items-center gap-3 p-3 border-top">
+                        <span class="fw-semibold text-muted">TOTAL:</span>
+                        <span class="pf-total" id="pfViewTotal">S/ 0.00</span>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="card border-0 shadow-sm rounded-4" id="timelineCard" style="display:none;">
+                <div class="card-header bg-white border-bottom py-3 px-4 rounded-top-4">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history me-1" style="color:#6366F1;"></i> Historial de sesiones</h6>
+                </div>
+                <div class="card-body p-4" id="timelineBody"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script th:inline="javascript">
+            const PROFORMA_ID = /*[[${proformaId}]]*/ null;
+        </script>
+        <script th:src="@{/js/proforma-view.js}"></script>
+    </th:block>
+
+</body>
+</html>

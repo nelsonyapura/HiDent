@@ -1,0 +1,736 @@
+.calendar-wrapper {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, .06), 0 1px 3px rgba(0, 0, 0, .03);
+            overflow: hidden;
+        }
+
+        .cal-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #F0FDFA 0%, #F7FFFE 100%);
+            border-bottom: 1px solid #CCFBF1;
+        }
+
+        .cal-toolbar .btn-nav {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9px;
+            border: 1.5px solid #99F6E4;
+            background: #fff;
+            cursor: pointer;
+            transition: all .15s;
+            font-size: 14px;
+            color: #0F766E;
+        }
+
+        .cal-toolbar .btn-nav:hover {
+            background: #0D9488;
+            border-color: #0D9488;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(13, 148, 136, .25);
+        }
+
+        .cal-toolbar .btn-today {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 5px 14px;
+            border-radius: 20px;
+            border: 1.5px solid #99F6E4;
+            background: #fff;
+            color: #0F766E;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .cal-toolbar .btn-today:hover {
+            background: #F0FDFA;
+            border-color: #14B8A6;
+            color: #0D9488;
+        }
+
+        .cal-toolbar .week-range {
+            font-size: 15px;
+            font-weight: 700;
+            color: #115E59;
+            min-width: 200px;
+        }
+
+        .cal-toolbar .view-toggle .btn {
+            font-size: 12px;
+            padding: 5px 14px;
+            font-weight: 600;
+            border-color: #CBD5E1;
+            color: #64748B;
+        }
+
+        .cal-toolbar .view-toggle .btn.active {
+            background: linear-gradient(135deg, #14B8A6, #0D9488);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 2px 8px rgba(13, 148, 136, .25);
+        }
+
+        .cal-toolbar .view-toggle .btn:not(.active):hover {
+            background: #F0FDFA;
+            color: #0D9488;
+            border-color: #99F6E4;
+        }
+
+        .cal-toolbar .btn-new-appt {
+            background: linear-gradient(135deg, #14B8A6, #0D9488);
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            font-size: 12.5px;
+            padding: 7px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all .2s;
+            box-shadow: 0 3px 12px rgba(13, 148, 136, .25);
+        }
+
+        .cal-toolbar .btn-new-appt:hover {
+            background: linear-gradient(135deg, #0D9488, #115E59);
+            box-shadow: 0 4px 16px rgba(13, 148, 136, .35);
+            transform: translateY(-1px);
+        }
+
+        .cal-toolbar .filter-select {
+            width: 140px;
+            font-size: 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            border: 1.5px solid #CBD5E1;
+            padding: 5px 12px;
+            color: #475569;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .cal-toolbar .filter-select:focus {
+            border-color: #0D9488;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, .12);
+            outline: none;
+        }
+
+        .cal-header-row {
+            display: grid;
+            border-bottom: 1px solid #CCFBF1;
+            background: linear-gradient(180deg, #F0FDFA, #F7FFFE);
+        }
+
+        .cal-header-cell {
+            text-align: center;
+            padding: 10px 4px;
+            border-left: 1px solid #E6FAF5;
+        }
+
+        .cal-header-cell:first-child {
+            border-left: none;
+        }
+
+        .cal-header-cell .day-name {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            color: #0F766E;
+        }
+
+        .cal-header-cell .day-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: 700;
+            color: #115E59;
+            margin-top: 2px;
+        }
+
+        .cal-header-cell.is-today .day-num {
+            background: linear-gradient(135deg, #14B8A6, #0D9488);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(13, 148, 136, .3);
+        }
+
+        .cal-header-cell.is-past .day-name,
+        .cal-header-cell.is-past .day-num {
+            opacity: .45;
+        }
+
+        .cal-body {
+            display: grid;
+            max-height: calc(100vh - 240px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: #99F6E4 transparent;
+        }
+
+        .cal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .cal-body::-webkit-scrollbar-thumb {
+            background: #99F6E4;
+            border-radius: 3px;
+        }
+
+        .cal-time-col {
+            border-right: 1px solid #E6FAF5;
+        }
+
+        .cal-time-label {
+            height: 60px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-end;
+            padding: 0 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #0F766E;
+            transform: translateY(-7px);
+            opacity: .6;
+        }
+
+        .cal-day-col {
+            position: relative;
+            border-left: 1px solid #F1F5F9;
+        }
+
+        .cal-hour-row {
+            height: 60px;
+            border-bottom: 1px solid #F8FAFC;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .cal-hour-row::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            border-bottom: 1px dashed #F1F5F9;
+        }
+
+        .cal-hour-row:hover {
+            background: #F0FDFA;
+        }
+
+        .cal-day-col.is-today {
+            background: rgba(13, 148, 136, .03);
+        }
+
+        .cal-event {
+            position: absolute;
+            left: 2px;
+            right: 2px;
+            border-radius: 8px;
+            padding: 3px 7px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            overflow: hidden;
+            z-index: 2;
+            transition: box-shadow .15s, transform .1s;
+            line-height: 1.3;
+            border-left: 3px solid;
+        }
+
+        .cal-event:hover {
+            box-shadow: 0 4px 14px rgba(0, 0, 0, .14);
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
+        .cal-event .ev-name {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cal-event .ev-time {
+            font-size: 10px;
+            font-weight: 400;
+            opacity: .75;
+        }
+
+        .cal-event.st-PROGRAMADA {
+            background: #F0FDFA;
+            color: #115E59;
+            border-color: #14B8A6;
+        }
+
+        .cal-event.st-CONFIRMADA {
+            background: #ECFDF5;
+            color: #065F46;
+            border-color: #10B981;
+        }
+
+        .cal-event.st-ATENDIDA {
+            background: #EFF6FF;
+            color: #1E40AF;
+            border-color: #3B82F6;
+        }
+
+        .cal-event.st-NO_ASISTIO {
+            background: #FFF7ED;
+            color: #92400E;
+            border-color: #F59E0B;
+        }
+
+        .cal-event.st-CANCELADA {
+            background: #FFF1F2;
+            color: #9F1239;
+            border-color: #E83E8C;
+            text-decoration: line-through;
+            opacity: .55;
+        }
+
+        .cal-now-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #E83E8C;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .cal-now-line::before {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: -3px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #E83E8C;
+            box-shadow: 0 0 6px rgba(232, 62, 140, .4);
+        }
+
+        .cal-legend {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #F0FDFA, #F7FFFE);
+            border-top: 1px solid #CCFBF1;
+            font-size: 11px;
+        }
+
+        .cal-legend span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .cal-legend .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+
+        .month-header-cell {
+            text-align: center;
+            padding: 8px 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            color: #0F766E;
+            background: linear-gradient(180deg, #F0FDFA, #F7FFFE);
+            border-bottom: 1px solid #CCFBF1;
+        }
+
+        .month-cell {
+            min-height: 90px;
+            padding: 6px;
+            border: 1px solid #F1F5F9;
+            cursor: pointer;
+            transition: background .15s;
+            position: relative;
+        }
+
+        .month-cell:hover {
+            background: #F0FDFA;
+        }
+
+        .month-cell.other-month {
+            background: #FAFBFC;
+            opacity: .5;
+        }
+
+        .month-cell.is-today {
+            background: rgba(13, 148, 136, .06);
+        }
+
+        .month-cell.is-today .month-day-num {
+            background: linear-gradient(135deg, #14B8A6, #0D9488);
+            color: #fff;
+        }
+
+        .month-day-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 700;
+            color: #115E59;
+            margin-bottom: 3px;
+        }
+
+        .month-event-pill {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 1px 5px;
+            border-radius: 4px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            line-height: 1.4;
+        }
+
+        .month-event-pill.st-PROGRAMADA {
+            background: #F0FDFA;
+            color: #115E59;
+        }
+
+        .month-event-pill.st-CONFIRMADA {
+            background: #ECFDF5;
+            color: #065F46;
+        }
+
+        .month-event-pill.st-ATENDIDA {
+            background: #EFF6FF;
+            color: #1E40AF;
+        }
+
+        .month-event-pill.st-NO_ASISTIO {
+            background: #FFF7ED;
+            color: #92400E;
+        }
+
+        .month-event-pill.st-CANCELADA {
+            background: #FFF1F2;
+            color: #9F1239;
+            opacity: .6;
+        }
+
+        .month-more {
+            font-size: 10px;
+            color: #0F766E;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .month-more:hover {
+            text-decoration: underline;
+        }
+
+
+        .patient-search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1.5px solid #CCFBF1;
+            border-radius: 10px;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, .12);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .patient-search-results.show {
+            display: block;
+        }
+
+        .ps-item {
+            padding: 9px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            border-bottom: 1px solid #F8FAFC;
+            transition: background .1s;
+        }
+
+        .ps-item:hover {
+            background: #F0FDFA;
+        }
+
+        .ps-item:last-child {
+            border-bottom: none;
+        }
+
+        .ps-item .ps-name {
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .ps-item .ps-dni {
+            font-size: 11px;
+            color: #0F766E;
+            font-weight: 500;
+        }
+
+        #appointmentModal .modal-content,
+        #viewModal .modal-content {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, .12);
+        }
+
+        #appointmentModal .modal-header,
+        #viewModal .modal-header {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        #appointmentModal .modal-title,
+        #viewModal .modal-title {
+            color: #115E59;
+        }
+
+        .modal .form-control,
+        .modal .form-select {
+            border: 1.5px solid #CBD5E1;
+            border-radius: 9px;
+            font-size: 13.5px;
+            transition: all .2s;
+        }
+
+        .modal .form-control:focus,
+        .modal .form-select:focus {
+            border-color: #0D9488;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, .12);
+        }
+
+        .view-info-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: #94A3B8;
+        }
+
+        .view-info-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .view-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #14B8A6, #0D9488);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+
+
+@media (max-width: 991.98px) {
+    .cal-toolbar {
+        padding: 10px 14px;
+        gap: 6px;
+    }
+    .cal-toolbar .week-range {
+        font-size: 13px;
+        min-width: auto;
+        flex-basis: 100%;
+        order: -1;
+        text-align: center;
+    }
+    .cal-toolbar .btn-new-appt {
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+    .cal-toolbar .filter-select {
+        width: 110px;
+        font-size: 11px;
+    }
+    .cal-toolbar .view-toggle .btn {
+        font-size: 11px;
+        padding: 4px 10px;
+    }
+    .cal-time-label {
+        font-size: 9px;
+        padding: 0 4px;
+    }
+    .cal-event {
+        font-size: 10px;
+        padding: 2px 4px;
+        border-left-width: 2px;
+    }
+    .cal-event .ev-time {
+        display: none;
+    }
+    .cal-header-cell .day-name {
+        font-size: 9px;
+    }
+    .cal-header-cell .day-num {
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+    }
+    .month-cell {
+        min-height: 70px;
+        padding: 4px;
+    }
+    .month-event-pill {
+        font-size: 9px;
+        padding: 1px 3px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .calendar-wrapper {
+        border-radius: 12px;
+    }
+    .cal-toolbar {
+        padding: 8px 10px;
+        gap: 4px;
+    }
+    .cal-toolbar .btn-nav {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+        border-radius: 7px;
+    }
+    .cal-toolbar .btn-today {
+        font-size: 11px;
+        padding: 4px 10px;
+    }
+    .cal-toolbar .week-range {
+        font-size: 12px;
+    }
+    .cal-toolbar .filter-select {
+        width: 100%;
+        font-size: 11px;
+        order: 10;
+    }
+    .cal-toolbar .view-toggle {
+        order: 9;
+    }
+    .cal-toolbar .view-toggle .btn {
+        font-size: 10px;
+        padding: 3px 8px;
+    }
+    .cal-toolbar .btn-new-appt {
+        width: 100%;
+        order: 11;
+        justify-content: center;
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+        padding: 8px 14px;
+    }
+
+
+    .cal-header-row {
+        min-width: 600px;
+    }
+    .cal-body {
+        min-width: 600px;
+    }
+    #weekDayView {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .cal-time-label {
+        font-size: 8px;
+        padding: 0 2px;
+    }
+    .cal-header-cell {
+        padding: 6px 2px;
+    }
+    .cal-header-cell .day-name {
+        font-size: 8px;
+        letter-spacing: .3px;
+    }
+    .cal-header-cell .day-num {
+        width: 22px;
+        height: 22px;
+        font-size: 11px;
+    }
+    .cal-event .ev-name {
+        font-size: 9px;
+    }
+    .cal-legend {
+        padding: 8px 10px;
+        gap: 8px;
+        font-size: 10px;
+    }
+    .cal-legend .dot {
+        width: 8px;
+        height: 8px;
+    }
+
+
+    .month-cell {
+        min-height: 55px;
+        padding: 2px;
+    }
+    .month-day-num {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+    }
+    .month-event-pill {
+        font-size: 8px;
+        padding: 0 2px;
+        border-radius: 2px;
+    }
+    .month-header-cell {
+        font-size: 9px;
+        padding: 6px 2px;
+    }
+    .month-more {
+        font-size: 8px;
+    }
+
+
+    #appointmentModal .modal-dialog,
+    #viewModal .modal-dialog {
+        margin: 8px;
+    }
+    #appointmentModal .modal-content,
+    #viewModal .modal-content {
+        border-radius: 14px;
+    }
+}

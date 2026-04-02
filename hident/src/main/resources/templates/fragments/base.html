@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE - Hi Dent">Hi Dent</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link th:href="@{/css/hident.css}" rel="stylesheet">
+    <link th:href="@{/css/base.css}" rel="stylesheet">
+</head>
+
+<body>
+
+
+    <aside class="hd-sidebar" id="hdSidebar">
+
+
+        <div class="hd-sidebar-brand">
+            <img th:src="@{/img/logo2.png}" alt="Hi Dent" onerror="this.style.display='none'">
+            <span>Hi Dent</span>
+        </div>
+
+
+        <div class="hd-sidebar-search">
+            <div class="hd-search-wrap">
+                <input  type="text"
+                        id="sidebarSearch"
+                        class="hd-search-input"
+                        placeholder="Buscar paciente por DNI…"
+                        maxlength="8"
+                        inputmode="numeric"
+                        autocomplete="off"
+                        oninput="this.value=this.value.replace(/\D/g,''); hdSearchInput(this.value)">
+                <button class="hd-search-btn" id="sidebarSearchBtn"
+                        onclick="hdSearchGo()" title="Buscar">
+                    <i class="bi bi-search" style="font-size:12px;"></i>
+                </button>
+                <div class="hd-search-loading" id="sidebarSearchLoading">
+                    <div class="spinner-border" role="status"></div>
+                </div>
+            </div>
+        </div>
+
+
+        <nav class="hd-sidebar-nav">
+            <div class="nav-section">Principal</div>
+            <a th:href="@{/home}" class="hd-nav-link" th:classappend="${#strings.equals(activePage,'home')} ? ' active'">
+                <i class="bi bi-house-door"></i> Inicio
+            </a>
+            <a th:href="@{/patients}" class="hd-nav-link" th:classappend="${#strings.equals(activePage,'patients')} ? ' active'">
+                <i class="bi bi-people"></i> Pacientes
+            </a>
+            <a th:href="@{/agenda}" class="hd-nav-link" th:classappend="${#strings.equals(activePage,'agenda')} ? ' active'">
+                <i class="bi bi-calendar-week"></i> Agenda
+            </a>
+            <a th:href="@{/budgets}" class="hd-nav-link" th:classappend="${#strings.equals(activePage,'budgets')} ? ' active'">
+                <i class="bi bi-calculator"></i> Presupuestos
+            </a>
+            <a th:href="@{/proformas}" class="hd-nav-link" th:classappend="${#strings.equals(activePage,'proformas')} ? ' active'">
+                <i class="bi bi-clipboard-check"></i> Proformas
+            </a>
+
+            <form id="logoutForm" th:action="@{/logout}" method="post" class="d-none"></form>
+        </nav>
+
+
+        <div class="hd-sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar"
+                     th:text="${(name != null ? #strings.substring(name,0,1) : #strings.substring(username,0,1))}">A</div>
+                <div class="user-info">
+                    <div class="user-name" th:text="${name != null ? name : username}">Admin</div>
+                    <div class="user-role">Administrador</div>
+                </div>
+            </div>
+            <div class="hd-footer-actions">
+                <a href="#" class="hd-footer-btn" data-bs-toggle="modal" data-bs-target="#editNameModal">
+                    <i class="bi bi-pencil-square"></i> Nombre
+                </a>
+                <a href="#" class="hd-footer-btn" onclick="runBackup(); return false;" id="btnBackup">
+    <i class="bi bi-cloud-arrow-up"></i> Backup
+</a>
+                <a href="#" class="hd-footer-btn hd-footer-btn-exit" onclick="document.getElementById('logoutForm').submit(); return false;">
+                    <i class="bi bi-box-arrow-right"></i> Salir
+                </a>
+            </div>
+        </div>
+    </aside>
+
+
+    <div class="hd-patient-popup" id="hdPatientPopup">
+        <div class="hd-popup-head">
+            <span class="hd-popup-head-label" id="hdPopupLabel">Resultado</span>
+            <button class="hd-popup-x" onclick="hdClosePopup()" title="Cerrar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="hd-popup-body" id="hdPopupBody"></div>
+    </div>
+
+
+    <div class="hd-sidebar-backdrop" id="hdBackdrop" onclick="toggleSidebar()"></div>
+
+
+    <button class="hd-sidebar-toggle" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i>
+    </button>
+
+
+    <div class="hd-main">
+        <div class="hd-topbar">
+            <div class="hd-topbar-title" layout:fragment="topbar-title">Dashboard</div>
+            <div class="hd-topbar-actions" layout:fragment="topbar-actions"></div>
+        </div>
+
+
+        <div class="hd-content" style="padding-bottom:0;">
+            <div th:if="${successMessage}"
+                 class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 py-3 shadow-sm border-0 rounded-3"
+                 role="alert">
+                <i class="bi bi-check-circle-fill fs-5"></i>
+                <span th:text="${successMessage}" class="fw-medium"></span>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${errorMessage}"
+                 class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 py-3 shadow-sm border-0 rounded-3"
+                 role="alert">
+                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                <span th:text="${errorMessage}" class="fw-medium"></span>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+
+
+        <div class="hd-content" layout:fragment="content"></div>
+    </div>
+
+
+
+
+    <div class="modal fade" id="editNameModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title fw-bold">Cambiar nombre</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/user/update-name}" method="post">
+                        <div class="mb-3">
+                            <input type="text" name="newName" class="form-control"
+                                   th:value="${name}" placeholder="Nuevo nombre" required>
+                        </div>
+                        <button type="submit" class="btn btn-hident w-100">
+                            <i class="bi bi-check-lg"></i> Guardar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script th:src="@{/js/base.js}"></script>
+
+    <th:block layout:fragment="scripts"></th:block>
+</body>
+</html>

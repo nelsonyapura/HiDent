@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{fragments/base}" lang="es">
+
+<head>
+    <title>Presupuestos</title>
+</head>
+
+<body>
+
+    <div layout:fragment="topbar-title">
+        <i class="bi bi-calculator me-1"></i> Presupuestos
+    </div>
+
+    <div layout:fragment="content">
+        <div class="hd-page">
+
+
+            <div class="hd-card hd-search-bar mb-3">
+                <div class="card-body p-3">
+                    <form class="d-flex gap-2 flex-wrap align-items-end" method="get" th:action="@{/budgets}">
+                        <div class="flex-grow-1">
+                            <label class="hd-label">Buscar paciente</label>
+                            <input type="text" name="q" class="hd-input" placeholder="Nombre, apellido o DNI..."
+                                th:value="${query}">
+                        </div>
+                        <div>
+                            <label class="hd-label">Estado</label>
+                            <select name="status" class="hd-input" style="width:160px;">
+                                <option value="TODOS" th:selected="${status == 'TODOS'}">Todos</option>
+                                <option value="BORRADOR" th:selected="${status == 'BORRADOR'}">Borrador</option>
+                                <option value="ENVIADO" th:selected="${status == 'ENVIADO'}">Enviado</option>
+                                <option value="ACEPTADO" th:selected="${status == 'ACEPTADO'}">Aceptado</option>
+                                <option value="EN_PROCESO" th:selected="${status == 'EN_PROCESO'}">En proceso</option>
+                                <option value="COMPLETADO" th:selected="${status == 'COMPLETADO'}">Completado</option>
+                                <option value="RECHAZADO" th:selected="${status == 'RECHAZADO'}">Rechazado</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-teal"><i class="bi bi-search"></i> Buscar</button>
+                    </form>
+                </div>
+            </div>
+
+
+            <div class="hd-card overflow-hidden">
+                <div class="hd-card-header">
+                    <div class="hd-card-header-icon"><i class="bi bi-calculator"></i></div>
+                    <div>
+                        <h6>Presupuestos</h6><small th:text="${totalCount + ' presupuesto(s)'}">0</small>
+                    </div>
+                    <div layout:fragment="topbar-actions" class="ms-auto">
+                        <a th:href="@{/budgets/create}" class="btn btn-sm btn-teal rounded-pill">
+                            <i class="bi bi-plus-lg"></i> Nuevo Presupuesto
+                        </a>
+                    </div>
+                </div>
+                <div class="p-0">
+                    <div th:if="${!budgets.isEmpty()}" class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead>
+                                <tr style="background:#0F766E;">
+                                    <th style="color:#000000;font-size:11px;font-weight:600;"></th>
+                                    <th style="color:#000000;font-size:11px;font-weight:600;">Paciente</th>
+                                    <th style="color:#000000;font-size:11px;font-weight:600;">Nombre</th>
+                                    <th style="color:#000000;font-size:11px;font-weight:600;">Doctor</th>
+                                    <th style="color:#000000;font-size:11px;font-weight:600;">Estado</th>
+                                    <th style="color:#000000;font-size:11px;font-weight:600;">Total</th>
+                                    <th style="color:#000000;font-size:11px;font-weight:600;">Fecha</th>
+                                    <th style="color:#000000;font-size:11px;font-weight:600;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="b : ${budgets}">
+                                    <td></td>
+                                    <td>
+                                        <div class="fw-semibold" th:text="${b.patient.fullName}">Paciente</div><small
+                                            class="text-muted" th:text="'DNI: ' + ${b.patient.dni}">DNI</small>
+                                    </td>
+                                    <td th:text="${b.budgetName} ?: '—'" class="text-muted">—</td>
+                                    <td th:text="${b.doctorName} ?: '—'">—</td>
+                                    <td><span class="badge rounded-pill" th:classappend="${b.statusBadgeClass}"
+                                            th:text="${b.statusLabel}">Estado</span></td>
+                                    <td class="fw-semibold" th:text="${b.totalFormatted}">S/ 0</td>
+                                    <td class="text-muted" th:text="${b.createdAtFormatted}">—</td>
+                                    <td><a th:href="@{'/budgets/' + ${b.idBudget}}"
+                                            class="btn btn-sm btn-outline-teal py-0 px-2"><i class="bi bi-eye"></i>
+                                            Ver</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${budgets.isEmpty()}" class="hd-empty">
+                        <i class="bi bi-calculator"></i>
+                        <h6>Sin presupuestos</h6>
+                        <small>Crea el primer presupuesto con el botón de arriba</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

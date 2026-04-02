@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/base}" lang="es">
+<head>
+    <title th:text="'Presupuesto #' + ${budget.idBudget}">Presupuesto</title>
+    <style>
+        .status-actions .btn { font-size: 12px; padding: 4px 12px; }
+        .item-actions .btn { padding: 2px 7px; font-size: 11px; }
+        .svc-group-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: #0D9488; padding: 8px 12px 4px; }
+        .svc-option { padding: 8px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #F1F5F9; transition: background .15s; display: flex; justify-content: space-between; align-items: center; }
+        .svc-option:hover { background: #F0FDFA; }
+        .svc-option .svc-price { font-weight: 600; color: #E83E8C; font-size: 12px; }
+        .svc-list-container { max-height: 260px; overflow-y: auto; border: 1.5px solid #E2E8F0; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div layout:fragment="topbar-title">
+        <i class="bi bi-calculator me-1"></i> Presupuesto
+        <small class="text-muted fw-normal ms-2 fs-6" th:text="'#' + ${budget.idBudget}">#1</small>
+    </div>
+
+    <div layout:fragment="topbar-actions">
+        <a th:href="@{'/budgets/create?patientId=' + ${budget.patient.idPatient}}"
+           class="btn btn-sm btn-teal rounded-pill me-2">
+            <i class="bi bi-plus-lg"></i> Nuevo Presupuesto
+        </a>
+        <a th:href="@{/budgets}" class="btn btn-sm btn-outline-secondary rounded-pill">
+            <i class="bi bi-arrow-left"></i> Volver a lista
+        </a>
+    </div>
+
+    <div layout:fragment="content">
+        <div class="hd-page">
+
+
+            <div id="budgetMeta"
+                 th:data-budget-id="${budget.idBudget}"
+                 th:data-patient-id="${budget.patient.idPatient}"
+                 style="display:none;"></div>
+
+
+            <div class="card border-0 shadow-sm rounded-4 mb-3">
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="hd-avatar sm bg-dark rounded-circle"></div>
+                                <div>
+                                    <h6 class="fw-bold mb-0" th:text="${budget.patient.fullName}">Paciente</h6>
+                                    <small class="text-muted" th:text="'DNI: ' + ${budget.patient.dni}">DNI</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <small class="text-muted d-block">Estado</small>
+                            <span class="badge rounded-pill" th:classappend="${budget.statusBadgeClass}"
+                                  th:text="${budget.statusLabel}" id="statusBadge">Estado</span>
+                        </div>
+                        <div class="col-md-2">
+                            <small class="text-muted d-block">Doctor</small>
+                            <span class="fw-semibold small" th:text="${budget.doctorName} ?: '—'">—</span>
+                        </div>
+                        <div class="col-md-2">
+                            <small class="text-muted d-block">Fecha</small>
+                            <span class="fw-semibold small" th:text="${budget.createdAtFormatted}">—</span>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <small class="text-muted d-block">Total</small>
+                            <span class="fw-bold" style="font-size:20px; color:#E83E8C;" th:text="${budget.totalFormatted}">S/ 0</span>
+                        </div>
+                    </div>
+
+
+                    <div class="mt-3 pt-3 border-top d-flex justify-content-end">
+                        <button class="btn btn-outline-danger rounded-pill" style="font-size:12px; padding:4px 12px;" onclick="deleteBudget()">
+                            <i class="bi bi-trash3"></i> Eliminar presupuesto
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            <div th:if="${budget.budgetName}" class="mb-3">
+                <span class="fw-semibold text-muted small">Nombre:</span>
+                <span class="fw-semibold" th:text="${budget.budgetName}"></span>
+            </div>
+
+
+            <div th:if="${patientBudgetCount > 1}" class="mb-3"
+                 style="background:#F0FDFA; border:0.5px solid #CCFBF1; border-radius:10px; padding:9px 16px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;"
+                 onclick="openHistoryModal()"
+                 onmouseover="this.style.background='#E6FFFB'" onmouseout="this.style.background='#F0FDFA'">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <i class="bi bi-clock-history" style="color:#0D9488; font-size:13px;"></i>
+                    <span style="font-size:12.5px; color:#115E59;">
+                        Este paciente tiene <strong th:text="${patientBudgetCount}">0</strong> presupuestos
+                    </span>
+                </div>
+                <span style="font-size:12.5px; color:#0D9488; font-weight:600;">Ver historial →</span>
+            </div>
+
+
+            <div class="card border-0 shadow-sm rounded-4 mb-3">
+                <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between py-3 px-4 rounded-top-4">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-list-check me-1" style="color:#0F766E;"></i> Detalle</h6>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-secondary rounded-pill" th:text="${budget.itemCount}">0</span>
+                        <button class="btn btn-sm btn-teal rounded-pill" onclick="openAddItemModal()">
+                            <i class="bi bi-plus-lg me-1"></i>Agregar servicio
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Servicio</th>
+                                    <th>Categoría</th>
+                                    <th>Diente</th>
+                                    <th>Cant.</th>
+                                    <th>P. Unit.</th>
+                                    <th>Dcto.</th>
+                                    <th>Subtotal</th>
+                                    <th>Comentario</th>
+                                    <th style="width:90px;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="item, iter : ${budget.items}">
+                                    <td class="text-muted" th:text="${iter.count}">1</td>
+                                    <td class="fw-semibold" th:text="${item.serviceName}">Servicio</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark"
+                                              th:text="${item.service != null ? item.service.categoryLabel : item.category}">Cat</span>
+                                    </td>
+                                    <td th:text="${item.tooth} ?: '—'">—</td>
+                                    <td th:text="${item.quantity}">1</td>
+                                    <td th:text="${item.unitPriceFormatted}">S/ 0</td>
+                                    <td th:text="${item.discountFormatted}">—</td>
+                                    <td class="fw-semibold" style="color:#059669;" th:text="${item.subtotalFormatted}">S/ 0</td>
+                                    <td class="text-muted" th:text="${item.comment} ?: '—'">—</td>
+                                    <td class="item-actions">
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-secondary"
+                                                title="Editar"
+                                                th:onclick="'openEditItemModal(' + ${item.idItem} + ', this)'"
+                                                th:data-service="${item.serviceName}"
+                                                th:data-tooth="${item.tooth}"
+                                                th:data-quantity="${item.quantity}"
+                                                th:data-price="${item.unitPrice}"
+                                                th:data-discount="${item.discount}"
+                                                th:data-comment="${item.comment}">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                title="Eliminar"
+                                                th:onclick="'removeItem(' + ${item.idItem} + ')'">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-light">
+                                    <td colspan="7" class="text-end fw-bold">TOTAL:</td>
+                                    <td colspan="3" class="fw-bold" style="font-size:16px; color:#E83E8C;"
+                                        th:text="${budget.totalFormatted}">S/ 0</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row g-3" th:if="${budget.patientNote != null || budget.internalNote != null}">
+                <div class="col-md-6" th:if="${budget.patientNote}">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold small mb-2"><i class="bi bi-chat-dots me-1" style="color:#E83E8C;"></i> Nota para el paciente</h6>
+                            <p class="small text-muted mb-0" th:text="${budget.patientNote}"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6" th:if="${budget.internalNote}">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold small mb-2"><i class="bi bi-lock me-1" style="color:#64748B;"></i> Nota interna</h6>
+                            <p class="small text-muted mb-0" th:text="${budget.internalNote}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="d-flex gap-3 flex-wrap mt-3 small text-muted">
+                <span th:if="${budget.createdAtFormatted}"><i class="bi bi-calendar3"></i> Creado: <strong th:text="${budget.createdAtFormatted}"></strong></span>
+                <span th:if="${budget.updatedAtFormatted}"><i class="bi bi-arrow-repeat"></i> Actualizado: <strong th:text="${budget.updatedAtFormatted}"></strong></span>
+                <span th:if="${budget.createdBy}"><i class="bi bi-person"></i> Por: <strong th:text="${budget.createdBy}"></strong></span>
+            </div>
+
+        </div>
+
+
+
+
+        <div class="modal fade" id="addItemModal" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow">
+                    <div class="modal-header border-0 pb-1" style="background:#F0FDFA;">
+                        <h6 class="modal-title fw-bold">
+                            <i class="bi bi-plus-circle me-2" style="color:#0D9488;"></i>Agregar Servicio
+                        </h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body pt-3">
+
+                        <div class="mb-3">
+                            <input type="text" id="addSvcSearch" class="hd-input"
+                                   placeholder="Buscar servicio por nombre..." oninput="filterServices()">
+                        </div>
+
+                        <div id="addSvcList" class="svc-list-container mb-3">
+                            <div class="text-center text-muted py-4 small">Cargando servicios...</div>
+                        </div>
+
+                        <div id="addSvcSelected" style="display:none;">
+                            <div class="p-3 rounded-3 mb-3" style="background:#F0FDFA; border:1.5px solid #CCFBF1;">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="fw-bold" id="addSvcName" style="color:#115E59;">—</span>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="clearServiceSelection()">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                                <input type="hidden" id="addSvcId">
+                                <input type="hidden" id="addSvcCurrency">
+                                <div class="row g-2">
+                                    <div class="col-4">
+                                        <label class="hd-label">Diente</label>
+                                        <input type="text" id="addSvcTooth" class="hd-input" placeholder="Ej: 36" maxlength="10">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="hd-label">Cantidad</label>
+                                        <input type="number" id="addSvcQty" class="hd-input" value="1" min="1">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="hd-label">Precio Unit.</label>
+                                        <input type="number" id="addSvcPrice" class="hd-input" step="0.01" min="0">
+                                    </div>
+                                </div>
+                                <div class="row g-2 mt-1">
+                                    <div class="col-4">
+                                        <label class="hd-label">Descuento %</label>
+                                        <input type="number" id="addSvcDiscount" class="hd-input" value="0" step="0.01" min="0" max="100">
+                                    </div>
+                                    <div class="col-8">
+                                        <label class="hd-label">Comentario</label>
+                                        <input type="text" id="addSvcComment" class="hd-input" placeholder="Opcional...">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-teal rounded-pill" id="addSvcSubmit" onclick="submitAddItem()" disabled>
+                            <i class="bi bi-plus-lg me-1"></i>Agregar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div class="modal fade" id="editItemModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow">
+                    <div class="modal-header border-0 pb-1" style="background:#F8FAFC;">
+                        <h6 class="modal-title fw-bold">
+                            <i class="bi bi-pencil me-2" style="color:#0D9488;"></i>Editar Ítem
+                        </h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body pt-3">
+                        <input type="hidden" id="editItemId">
+                        <div class="mb-3">
+                            <label class="hd-label">Servicio</label>
+                            <input type="text" id="editItemService" class="hd-input" readonly
+                                   style="background:#F1F5F9; cursor:not-allowed;">
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-4">
+                                <label class="hd-label">Diente</label>
+                                <input type="text" id="editItemTooth" class="hd-input" maxlength="10">
+                            </div>
+                            <div class="col-4">
+                                <label class="hd-label">Cantidad</label>
+                                <input type="number" id="editItemQty" class="hd-input" min="1">
+                            </div>
+                            <div class="col-4">
+                                <label class="hd-label">Precio Unit.</label>
+                                <input type="number" id="editItemPrice" class="hd-input" step="0.01" min="0">
+                            </div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <label class="hd-label">Descuento %</label>
+                                <input type="number" id="editItemDiscount" class="hd-input" step="0.01" min="0" max="100">
+                            </div>
+                            <div class="col-8">
+                                <label class="hd-label">Comentario</label>
+                                <input type="text" id="editItemComment" class="hd-input">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-teal rounded-pill" onclick="submitEditItem()">
+                            <i class="bi bi-check-lg me-1"></i>Guardar cambios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div class="modal fade" id="historyModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content rounded-4 border-0 shadow">
+                    <div class="modal-header border-0 pb-1" style="background:#F0FDFA;">
+                        <h6 class="modal-title fw-bold">
+                            <i class="bi bi-clock-history me-2" style="color:#0D9488;"></i>Presupuestos de
+                            <span th:text="${budget.patient.fullName}">Paciente</span>
+                        </h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body pt-3">
+
+                        <div th:each="b : ${patientBudgets}" class="mb-2">
+
+                            <div th:if="${b.idBudget == budget.idBudget}"
+                                 style="background:#F0FDFA; border:1.5px solid #0D9488; border-radius:10px; padding:12px 14px;">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <span style="font-size:13px; font-weight:600; color:#115E59;">
+                                        #<span th:text="${b.idBudget}"></span>
+                                        <span th:if="${b.budgetName}" th:text="' — ' + ${b.budgetName}"></span>
+                                    </span>
+                                    <span style="font-size:10px; background:#CCFBF1; color:#0F766E; padding:2px 10px; border-radius:8px; font-weight:600;">
+                                        Viendo ahora
+                                    </span>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span style="font-size:16px; font-weight:600; color:#E83E8C;" th:text="${b.totalFormatted}">S/ 0</span>
+                                    <span style="font-size:11px; color:#64748B;">
+                                        <span th:text="${b.createdAtFormatted}">—</span> —
+                                        <span th:text="${b.itemCount + ' servicio(s)'}">0</span>
+                                    </span>
+                                </div>
+                            </div>
+
+
+                            <div th:if="${b.idBudget != budget.idBudget}"
+                                 style="background:#F8FAFC; border:0.5px solid #E2E8F0; border-radius:10px; padding:12px 14px; transition:border-color .15s;"
+                                 onmouseover="this.style.borderColor='#0D9488'" onmouseout="this.style.borderColor='#E2E8F0'">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <span style="font-size:13px; font-weight:600; color:#334155;">
+                                        #<span th:text="${b.idBudget}"></span>
+                                        <span th:if="${b.budgetName}" th:text="' — ' + ${b.budgetName}"></span>
+                                    </span>
+                                    <div class="d-flex gap-2">
+                                        <a th:href="@{'/budgets/' + ${b.idBudget}}"
+                                           class="btn btn-sm py-0 px-2"
+                                           style="font-size:11px; color:#0D9488; border:0.5px solid #99F6E4; border-radius:6px;">
+                                            <i class="bi bi-eye me-1"></i>Ver
+                                        </a>
+                                        <button type="button"
+                                                class="btn btn-sm py-0 px-2"
+                                                style="font-size:11px; color:#E24B4A; border:0.5px solid #FECACA; border-radius:6px;"
+                                                th:onclick="'deleteFromHistory(' + ${b.idBudget} + ')'">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span style="font-size:15px; font-weight:600; color:#E83E8C;" th:text="${b.totalFormatted}">S/ 0</span>
+                                    <span style="font-size:11px; color:#94A3B8;">
+                                        <span th:text="${b.createdAtFormatted}">—</span> —
+                                        <span th:text="${b.itemCount + ' servicio(s)'}">0</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer border-0 pt-0 justify-content-center">
+                        <a th:href="@{'/budgets/create?patientId=' + ${budget.patient.idPatient}}"
+                           class="btn btn-sm btn-outline-teal rounded-pill">
+                            <i class="bi bi-plus-lg me-1"></i>Nuevo presupuesto para este paciente
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <th:block layout:fragment="scripts">
+    <script th:src="@{/js/view.js}"></script>
+    </th:block>
+
+</body>
+</html>

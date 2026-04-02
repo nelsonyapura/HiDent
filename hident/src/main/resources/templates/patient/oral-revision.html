@@ -1,0 +1,102 @@
+<div th:fragment="tab-revision" id="tab-revision" class="tab-pane fade">
+
+    <div class="hd-card mb-3">
+        <div class="hd-card-header">
+            <div class="hd-card-header-icon"><i class="bi bi-clipboard2-pulse"></i></div>
+            <div>
+                <h6>Nueva Revisión Local</h6><small>Examen intraoral del paciente</small>
+            </div>
+        </div>
+        <div class="hd-card-body">
+            <form th:action="@{'/patient/' + ${patient.idPatient} + '/oral-revision'}" method="post">
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6"><label class="hd-label">Labios</label><input type="text" name="labios"
+                            class="hd-input" value="Sin alteraciones"></div>
+                    <div class="col-md-6"><label class="hd-label">Carrillos</label><input type="text" name="carrillos"
+                            class="hd-input" value="Sin alteraciones"></div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6"><label class="hd-label">Paladar Duro</label><input type="text"
+                            name="paladarDuro" class="hd-input" value="Sin alteraciones"></div>
+                    <div class="col-md-6"><label class="hd-label">Paladar Blando</label><input type="text"
+                            name="paladarBlando" class="hd-input" value="Sin alteraciones"></div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6"><label class="hd-label">Encías</label><input type="text" name="encias"
+                            class="hd-input" value="Sin alteraciones"></div>
+                    <div class="col-md-6"><label class="hd-label">Lengua</label><input type="text" name="lengua"
+                            class="hd-input" value="Sin alteraciones"></div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6"><label class="hd-label">Piso de Boca</label><input type="text" name="pisoBoca"
+                            class="hd-input" value="Sin alteraciones"></div>
+                    <div class="col-md-6"><label class="hd-label">Orofaringe</label><input type="text" name="orofaringe"
+                            class="hd-input" value="Sin alteraciones"></div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6"><label class="hd-label">ATM</label><input type="text" name="atm"
+                            class="hd-input" value="Sin alteraciones"></div>
+                    <div class="col-md-6"><label class="hd-label">Higiene</label><select name="higiene"
+                            class="hd-input">
+                            <option value="Buena">Buena</option>
+                            <option value="Regular" selected>Regular</option>
+                            <option value="Mala">Mala</option>
+                        </select></div>
+                </div>
+                <div class="mb-3"><label class="hd-label">Observaciones</label><textarea name="observations"
+                        class="hd-input" rows="2" placeholder="Observaciones adicionales..."></textarea></div>
+                <button type="submit" class="btn btn-teal w-100"><i class="bi bi-clipboard-check"></i> Registrar
+                    Revisión</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="hd-card">
+        <div class="hd-card-header">
+            <div class="hd-card-header-icon"><i class="bi bi-clock-history"></i></div>
+            <div>
+                <h6>Historial de Revisiones Locales</h6><small
+                    th:text="${oralRevisionsCount + ' revisión(es)'}">0</small>
+            </div>
+        </div>
+        <div class="hd-card-body">
+            <div th:if="${!oralRevisions.isEmpty()}" class="d-flex flex-column gap-3">
+                <div th:each="rev : ${oralRevisions}" class="rounded-3 p-3 border" style="background:#F8FAFC;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="small text-muted">
+                            <i class="bi bi-calendar3"></i> <span
+                                th:text="${#temporals.format(rev.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                            <span th:if="${rev.createdBy}"> · Por: <strong th:text="${rev.createdBy}"></strong></span>
+                        </div>
+                        <span class="badge rounded-pill"
+                            th:classappend="${rev.higiene == 'Buena' ? 'bg-success-subtle text-success' : (rev.higiene == 'Mala' ? 'bg-danger-subtle text-danger' : 'bg-warning-subtle text-warning')}"
+                            th:text="'Higiene: ' + ${rev.higiene}">Higiene</span>
+                    </div>
+                    <div class="row g-2 small">
+                        <div class="col-6 col-md-4"><strong>Labios:</strong> <span th:text="${rev.labios}"></span></div>
+                        <div class="col-6 col-md-4"><strong>Carrillos:</strong> <span th:text="${rev.carrillos}"></span>
+                        </div>
+                        <div class="col-6 col-md-4"><strong>Paladar Duro:</strong> <span
+                                th:text="${rev.paladarDuro}"></span></div>
+                        <div class="col-6 col-md-4"><strong>Paladar Blando:</strong> <span
+                                th:text="${rev.paladarBlando}"></span></div>
+                        <div class="col-6 col-md-4"><strong>Encías:</strong> <span th:text="${rev.encias}"></span></div>
+                        <div class="col-6 col-md-4"><strong>Lengua:</strong> <span th:text="${rev.lengua}"></span></div>
+                        <div class="col-6 col-md-4"><strong>Piso de Boca:</strong> <span
+                                th:text="${rev.pisoBoca}"></span></div>
+                        <div class="col-6 col-md-4"><strong>Orofaringe:</strong> <span
+                                th:text="${rev.orofaringe}"></span></div>
+                        <div class="col-6 col-md-4"><strong>ATM:</strong> <span th:text="${rev.atm}"></span></div>
+                    </div>
+                    <div th:if="${rev.observations}" class="mt-2 small"><strong>Observaciones:</strong> <span
+                            th:text="${rev.observations}"></span></div>
+                </div>
+            </div>
+            <div th:if="${oralRevisions.isEmpty()}" class="hd-empty">
+                <i class="bi bi-clipboard2-pulse"></i>
+                <h6>Sin revisiones locales</h6>
+                <small>Registre la primera revisión usando el formulario</small>
+            </div>
+        </div>
+    </div>
+</div>

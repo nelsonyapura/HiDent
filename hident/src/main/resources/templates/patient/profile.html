@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{fragments/base}" lang="es">
+
+<head>
+    <title th:text="${patient.fullName}">Ficha Paciente</title>
+    <link th:href="@{/css/evolution.css}" rel="stylesheet">
+</head>
+
+<body>
+
+    <div layout:fragment="topbar-title">
+        <i class="bi bi-clipboard-pulse me-1"></i> Ficha de Paciente
+    </div>
+
+    <div layout:fragment="content">
+        <div class="hd-page">
+
+
+            <div class="hd-card mb-3">
+                <div class="hd-card-header">
+                    <div class="hd-avatar lg"
+                        th:text="${patient.firstName.substring(0,1) + patient.lastName.substring(0,1)}">JD</div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="font-size:18px;color:#1E293B;" th:text="${patient.fullName}">
+                            Nombre</h5>
+                        <div class="d-flex gap-3 flex-wrap mt-1 small text-muted">
+                            <span><i class="bi bi-card-text"></i> DNI: <strong th:text="${patient.dni}"></strong></span>
+                            <span th:if="${patient.effectiveAge}"><i class="bi bi-calendar"></i> <span
+                                    th:text="${patient.effectiveAge + ' años'}"></span></span>
+                            <span th:if="${patient.minor}" class="badge bg-danger-subtle text-danger">Menor de
+                                edad</span>
+                            <span th:if="${patient.phone}"><i class="bi bi-telephone"></i> <span
+                                    th:text="${patient.phone}"></span></span>
+                            <span th:if="${patient.district}"><i class="bi bi-geo-alt"></i> <span
+                                    th:text="${patient.district}"></span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <ul class="nav nav-pills nav-fill hd-tabs mb-3" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-datos" type="button"
+                        role="tab">
+                        <i class="bi bi-person"></i> Datos
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-anamnesis" type="button"
+                        role="tab">
+                        <i class="bi bi-heart-pulse"></i> Anamnesis
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-notas" type="button" role="tab">
+                        <i class="bi bi-journal-text"></i> Evolución
+                        <span th:if="${notesCount > 0}" class="badge bg-light text-dark rounded-pill ms-1"
+                            th:text="${notesCount}"></span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-docs" type="button" role="tab">
+                        <i class="bi bi-folder"></i> Documentos
+                        <span th:if="${documentsCount > 0}" class="badge bg-light text-dark rounded-pill ms-1"
+                            th:text="${documentsCount}"></span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-consents" type="button"
+                        role="tab">
+                        <i class="bi bi-file-earmark-check"></i> Consentimientos
+                        <span th:if="${consentsCount > 0}" class="badge bg-light text-dark rounded-pill ms-1"
+                            th:text="${consentsCount}"></span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-revision" type="button"
+                        role="tab">
+                        <i class="bi bi-clipboard2-pulse"></i> Rev. Local
+                        <span th:if="${oralRevisionsCount > 0}" class="badge bg-light text-dark rounded-pill ms-1"
+                            th:text="${oralRevisionsCount}"></span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a th:href="@{/patient/{id}/odontogram(id=${patient.idPatient})}" class="nav-link">
+                        <i class="bi bi-grid-3x3-gap"></i> Odontograma
+                    </a>
+                </li>
+            </ul>
+
+
+            <div class="tab-content">
+                <div th:replace="~{patient/data :: tab-datos}"></div>
+                <div th:replace="~{patient/anamnesis :: tab-anamnesis}"></div>
+                <div th:replace="~{patient/evolution :: tab-notas}"></div>
+                <div th:replace="~{patient/document :: tab-docs}"></div>
+                <div th:replace="~{patient/consent :: tab-consents}"></div>
+                <div th:replace="~{patient/oral-revision :: tab-revision}"></div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            function toggleAnamnesisMode() {
+                var v = document.getElementById('anamnesisView');
+                var e = document.getElementById('anamnesisEdit');
+                if (!v || !e) return;
+                var editing = e.style.display !== 'none';
+                v.style.display = editing ? '' : 'none';
+                e.style.display = editing ? 'none' : '';
+                if (!editing) e.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            function editCalcAge() {
+                var d = document.getElementById('editBirthDate'), ageInput = document.getElementById('editAgeInput');
+                if (!d.value) { ageInput.value = ''; return; }
+                var b = new Date(d.value), t = new Date(), age = t.getFullYear() - b.getFullYear();
+                var m = t.getMonth() - b.getMonth();
+                if (m < 0 || (m === 0 && t.getDate() < b.getDate())) age--;
+                ageInput.value = age;
+            }
+
+            /*  PERSISTIR TAB ACTIVO  */
+            (function () {
+                // Prioridad: 1) parámetro ?tab= en URL  2) hash en URL  3) sessionStorage
+                var params = new URLSearchParams(window.location.search);
+                var tabId = params.get('tab') || window.location.hash.replace('#', '') || sessionStorage.getItem('hdActiveTab');
+
+                if (tabId) {
+                    var tabBtn = document.querySelector('[data-bs-target="#' + tabId + '"]');
+                    if (tabBtn) {
+                        // Desactivar tab actual
+                        document.querySelectorAll('.hd-tabs .nav-link').forEach(function (b) { b.classList.remove('active'); });
+                        document.querySelectorAll('.tab-content .tab-pane').forEach(function (p) {
+                            p.classList.remove('show', 'active');
+                        });
+                        // Activar el tab correcto
+                        tabBtn.classList.add('active');
+                        var pane = document.querySelector(tabId.startsWith('#') ? tabId : '#' + tabId);
+                        if (pane) { pane.classList.add('show', 'active'); }
+                    }
+                }
+
+                // Guardar tab activo en sessionStorage cuando cambia
+                document.querySelectorAll('.hd-tabs .nav-link[data-bs-toggle="pill"]').forEach(function (btn) {
+                    btn.addEventListener('shown.bs.tab', function (e) {
+                        var target = e.target.getAttribute('data-bs-target');
+                        if (target) {
+                            var id = target.replace('#', '');
+                            sessionStorage.setItem('hdActiveTab', id);
+                        }
+                    });
+                });
+
+                // Limpiar parámetro ?tab= de la URL sin recargar
+                if (params.has('tab')) {
+                    params.delete('tab');
+                    var newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+                    window.history.replaceState({}, '', newUrl);
+                }
+            })();
+        </script>
+    </th:block>
+
+</body>
+
+</html>

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/base}" lang="es">
+<head>
+    <title th:text="'Odontograma — ' + ${patient.fullName}">Odontograma</title>
+    <link th:href="@{/css/odontogram.css}" rel="stylesheet">
+</head>
+<body>
+
+    <div layout:fragment="topbar-title">
+        <i class="bi bi-grid-3x3-gap me-1"></i> Odontograma
+        <small class="text-muted fw-normal ms-2 fs-6" th:text="${patient.fullName}"></small>
+    </div>
+
+    <div layout:fragment="topbar-actions">
+        <a th:href="@{'/patient/' + ${patient.idPatient}}" class="btn btn-sm btn-outline-secondary rounded-pill">
+            <i class="bi bi-arrow-left"></i> Volver a ficha
+        </a>
+    </div>
+
+    <div layout:fragment="content">
+        <div style="max-width:1540px; margin: 0 auto;">
+
+
+            <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                <div class="avatar-circle"
+                     th:text="${patient.firstName.substring(0,1) + patient.lastName.substring(0,1)}">JD</div>
+                <div>
+                    <h5 class="fw-bold mb-0" th:text="${patient.fullName}">Paciente</h5>
+                    <small class="text-muted">
+                        DNI: <span th:text="${patient.dni}"></span>
+                        <span th:if="${patient.age}"> · <span th:text="${patient.age}"></span> años</span>
+                    </small>
+                </div>
+            </div>
+
+
+            <div class="row g-3 mb-3">
+
+
+                <div class="col-xl-9 col-lg-8">
+                    <div class="odontogram-wrapper">
+
+
+                        <div class="d-flex align-items-center gap-2 flex-wrap mb-3">
+                            <span class="fw-bold" style="font-size:15px;">
+                                <i class="bi bi-grid-3x3-gap" style="color:#E83E8C;"></i> Odontograma
+                            </span>
+                            <div class="ms-auto d-flex align-items-center gap-2 flex-wrap">
+                                <select id="dentitionType" class="form-select form-select-sm rounded-pill" style="width:120px;">
+                                    <option value="adult">Adultos</option>
+                                    <option value="child">Niños</option>
+                                    <option value="mixed">Mixto</option>
+                                </select>
+                                <select id="nomenclature" class="form-select form-select-sm rounded-pill" style="width:145px;">
+                                    <option value="FDI">Internacional (FDI)</option>
+                                    <option value="ADA">ADA (Universal)</option>
+                                </select>
+                                <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="toggleLegend()">
+                                    <i class="bi bi-info-circle"></i> Leyenda
+                                </button>
+                                <button class="btn btn-sm btn-hident rounded-pill" onclick="saveAllPending()">
+                                    <i class="bi bi-floppy"></i> Guardar
+                                </button>
+                            </div>
+                        </div>
+
+
+                        <div id="legendPanel" class="mb-3 p-3 rounded-3" style="background:#F8FAFC; display:none;">
+                            <div class="d-flex flex-wrap gap-2" style="font-size:11px;">
+                                <span class="fw-bold w-100" style="color:#1E293B;">Norma Técnica — Colores</span>
+                                <span class="d-flex align-items-center"><span class="legend-dot" style="background:#EF4444;"></span>Caries / Fractura / Temporal / RR</span>
+                                <span class="d-flex align-items-center"><span class="legend-dot" style="background:#2563EB;"></span>Azul = Buen estado / Tratamiento</span>
+                                <span class="d-flex align-items-center"><span class="legend-dot" style="background:#16A34A;"></span>Rest. Resina (buena)</span>
+                                <span class="d-flex align-items-center"><span class="legend-dot" style="background:#78350F;"></span>Rest. Resina (mala)</span>
+                                <span class="d-flex align-items-center"><span class="legend-dot" style="background:#7C3AED;"></span>Rest. Amalgama (buena)</span>
+                                <span class="d-flex align-items-center"><span class="legend-dot" style="background:#F97316;"></span>Rest. Amalgama (mala)</span>
+                                <span class="d-flex align-items-center"><span class="legend-dot" style="background:#94A3B8;"></span>Ausente</span>
+                                <span class="d-flex align-items-center"><span class="legend-dot" style="background:#1F2937;"></span>Extracción</span>
+                                <span class="fw-bold w-100 mt-1" style="color:#1E293B;">Siglas de Recuadro</span>
+                                <span class="text-muted">TC=Trat. Conductos · PC=Pulpectomía · PP=Pulpotomía · IMP=Implante</span>
+                                <span class="text-muted">DES=Desgaste · DIS=Discrómico · E=Ectópico · I=Impactación · SI=Semi-imp.</span>
+                                <span class="text-muted">MAC=Macrodoncia · MIC=Microdoncia · M1/M2/M3=Movilidad · RR=Rem. Radicular</span>
+                                <span class="text-muted">AM=Amalgama · R=Resina · IV=Ionómero · IM=Incr. Metálica · IE=Incr. Estética</span>
+                                <span class="fw-bold w-100 mt-1" style="color:#1E293B;">Coronas</span>
+                                <span class="text-muted">CC=Completa · CF=Fenestrada · CMC=Metal Cerámica · CJ=Jacket · CV=Veneer</span>
+                                <span class="fw-bold w-100 mt-1" style="color:#1E293B;">Overlays de Rango</span>
+                                <span class="text-muted">⊞ Ap. Fijo ·  Ap. Removible · ↔ Diastema ·  Prótesis · ⊙ Supernumerario</span>
+                            </div>
+                        </div>
+
+
+                        <div class="arch-label text-center mb-1"> Arcada Superior</div>
+                        <div class="arch-scroll">
+                            <div class="arch-row" id="upperArch"></div>
+                        </div>
+
+                        <div class="d-flex justify-content-center align-items-center my-4 gap-2" style="padding: 8px 0;">
+                            <small class="text-muted" style="font-size:10px; letter-spacing:.5px;">DERECHO</small>
+                            <div class="midline" style="height:16px;"></div>
+                            <small class="text-muted" style="font-size:10px; letter-spacing:.5px;">IZQUIERDO</small>
+                        </div>
+
+
+                        <div class="arch-scroll">
+                            <div class="arch-row lower" id="lowerArch"></div>
+                        </div>
+                        <div class="arch-label text-center mt-1"> Arcada Inferior</div>
+
+                    </div>
+                </div>
+
+
+<div class="col-xl-3 col-lg-4">
+    <div class="tooth-panel">
+
+
+        <div class="mode-bar">
+            <button class="mode-btn active" id="modeNormal" onclick="setMode('normal')">
+                <i class="bi bi-pencil-fill" style="font-size:10px;"></i> Normal
+            </button>
+            <button class="mode-btn" id="modeCorona" onclick="setMode('corona')">
+                 Corona
+            </button>
+            <button class="mode-btn" id="modeFijo" onclick="setMode('fijo')">
+                ⊞ Fijo
+            </button>
+            <button class="mode-btn" id="modeRemovible" onclick="setMode('removible')">
+                 Removible
+            </button>
+            <button class="mode-btn" id="modeRango" onclick="setMode('rango')">
+                ↔ Rango
+            </button>
+        </div>
+
+
+        <div id="panelNormal" class="sub-panel active">
+            <div id="noSelectionMsg" class="text-center py-4 text-muted">
+                <i class="bi bi-cursor" style="font-size:32px; opacity:.4;"></i>
+                <p class="mt-2 small">Haz clic en un diente<br>para editar su estado</p>
+            </div>
+
+            <div id="toothEditPanel" style="display:none;">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="avatar-circle" style="width:36px;height:36px;font-size:13px;" id="toothEditNum">18</div>
+                    <div>
+                        <div class="fw-bold small" id="toothEditName">Diente</div>
+                        <div class="text-muted" style="font-size:11px;" id="toothEditArch">Arcada superior</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold mb-1">Condiciones actuales</label>
+                    <div id="currentConditionsList">
+                        <p class="text-muted small mb-0">Sin condiciones registradas.</p>
+                    </div>
+                </div>
+
+                <label class="form-label small fw-semibold mb-1">Agregar condición</label>
+                <select id="conditionSelect" class="form-select form-select-sm mb-3">
+                    <option value="">— Sin marcar —</option>
+                    <optgroup label="Caries y Restauraciones">
+                        <option value="CARIES"> Caries</option>
+                        <option value="OBTURACION_RESINA_BUENA">🟢 Restauración Resina (R) buena</option>
+                        <option value="OBTURACION_RESINA_MALA">🟤 Restauración Resina (R) mala</option>
+                        <option value="OBTURACION_AMALGAMA_BUENA">🟣 Restauración Amalgama (AM) buena</option>
+                        <option value="OBTURACION_AMALGAMA_MALA">🟠 Restauración Amalgama (AM) mala</option>
+                        <option value="RESTAURACION_TEMPORAL"> Restauración Temporal</option>
+                    </optgroup>
+                    <optgroup label="Tratamiento Pulpar">
+                        <option value="TRATAMIENTO_CONDUCTOS"> Trat. Conductos (TC)</option>
+                        <option value="PULPECTOMIA"> Pulpectomía (PC)</option>
+                        <option value="PULPOTOMIA"> Pulpotomía (PP)</option>
+                    </optgroup>
+                    <optgroup label="Estado del Diente">
+                        <option value="AUSENTE"> Diente Ausente</option>
+                        <option value="EXTRACCION"> Extracción Indicada</option>
+                        <option value="FRACTURA"> Fractura</option>
+                        <option value="REMANENTE_RADICULAR"> Remanente Radicular (RR)</option>
+                    </optgroup>
+                    <optgroup label="Anomalías">
+                        <option value="DESGASTE"> Desgaste Oclusal/Incisal (DES)</option>
+                        <option value="DISCROMIA"> Diente Discrómico (DIS)</option>
+                        <option value="ECTOPICO"> Diente Ectópico (E)</option>
+                        <option value="CLAVIJA"> Diente en Clavija</option>
+                        <option value="EXTRUIDO"> Diente Extruido</option>
+                        <option value="INTRUIDO"> Diente Intruido</option>
+                        <option value="IMPACTACION"> Impactación (I)</option>
+                        <option value="SEMI_IMPACTACION"> Semi-impactación (SI)</option>
+                        <option value="MACRODONCIA"> Macrodoncia (MAC)</option>
+                        <option value="MICRODONCIA"> Microdoncia (MIC)</option>
+                        <option value="GIROVERSION"> Giroversión</option>
+                    </optgroup>
+                    <optgroup label="Movilidad">
+                        <option value="MOVILIDAD_1"> Movilidad Grado 1 (M1)</option>
+                        <option value="MOVILIDAD_2"> Movilidad Grado 2 (M2)</option>
+                        <option value="MOVILIDAD_3"> Movilidad Grado 3 (M3)</option>
+                    </optgroup>
+                    <optgroup label="Otros">
+                        <option value="IMPLANTE"> Implante (IMP)</option>
+                        <option value="OTRO">🟪 Otro</option>
+                    </optgroup>
+                </select>
+
+                <div id="surfacesGroup">
+                    <label class="form-label small fw-semibold mb-1">Superficies afectadas</label>
+                    <div class="d-flex gap-1 mb-3 flex-wrap">
+                        <button class="surface-btn" data-surface="M" title="Mesial">M</button>
+                        <button class="surface-btn" data-surface="D" title="Distal">D</button>
+                        <button class="surface-btn" data-surface="V" title="Vestibular">V</button>
+                        <button class="surface-btn" data-surface="L" title="Lingual">L</button>
+                        <button class="surface-btn" data-surface="P" title="Palatino">P</button>
+                        <button class="surface-btn" data-surface="O" title="Oclusal">O</button>
+                    </div>
+                </div>
+
+                <label class="form-label small fw-semibold mb-1">Nota clínica</label>
+                <textarea id="toothNote" class="form-control form-control-sm mb-3"
+                          rows="2" placeholder="Observación..."></textarea>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-hident btn-sm flex-fill" onclick="applyToothChanges()">
+                        <i class="bi bi-check-lg"></i> Aplicar
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="clearCurrentTooth()" title="Limpiar todo">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="panelCorona" class="sub-panel">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span style="font-size:20px;"></span>
+                <div>
+                    <div class="fw-bold small">Corona</div>
+                    <div class="text-muted" style="font-size:11px;">Norma 1.4 / 1.5</div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold mb-1">Tipo</label>
+                <select id="coronaCondType" class="form-select form-select-sm">
+                    <option value="CORONA_DEFINITIVA">Corona Definitiva (azul)</option>
+                    <option value="CORONA_TEMPORAL">Corona Temporal (rojo)</option>
+                    <option value="CORONA_MAL_ESTADO">Corona Mal Estado (rojo )</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold mb-1">Diente seleccionado</label>
+                <div id="coronaToothDisplay" class="form-control form-control-sm text-center fw-bold"
+                     style="background:#F8FAFC; color:#94A3B8;">— Haz clic en un diente —</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold mb-1">Sigla (solo definitiva)</label>
+                <select id="coronaTypeSelect" class="form-select form-select-sm">
+                    <option value="CC">Corona Completa (CC)</option>
+                    <option value="CF">Corona Fenestrada (CF)</option>
+                    <option value="CMC" selected>Corona Metal Cerámica (CMC)</option>
+                    <option value="CJ">Corona Jacket (CJ)</option>
+                    <option value="CV">Corona Veneer (CV)</option>
+                    <option value="3/4">Corona Parcial 3/4</option>
+                    <option value="4/5">Corona Parcial 4/5</option>
+                    <option value="7/8">Corona Parcial 7/8</option>
+                </select>
+            </div>
+            <button class="btn btn-sm w-100 fw-bold" id="btnApplyCorona" onclick="applyCorona()"
+                    style="background:#2563EB; color:#fff; border:none; border-radius:10px;" disabled>
+                <i class="bi bi-check-lg"></i> Aplicar Corona
+            </button>
+        </div>
+
+
+        <div id="panelFijo" class="sub-panel">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span style="font-size:18px;">⊞</span>
+                <div>
+                    <div class="fw-bold small">Ap. Ortodóntico Fijo</div>
+                    <div class="text-muted" style="font-size:11px;">Norma 1.1 — Cuadrados + línea</div>
+                </div>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label small fw-semibold mb-1">Desde</label>
+                    <div id="fijoStartDisplay" class="form-control form-control-sm text-center fw-bold"
+                         style="background:#F8FAFC; color:#94A3B8;">—</div>
+                </div>
+                <div class="col-6">
+                    <label class="form-label small fw-semibold mb-1">Hasta</label>
+                    <div id="fijoEndDisplay" class="form-control form-control-sm text-center fw-bold"
+                         style="background:#F8FAFC; color:#94A3B8;">—</div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold mb-1">Estado</label>
+                <select id="fijoEstadoSelect" class="form-select form-select-sm">
+                    <option value="bueno">Buen estado (azul)</option>
+                    <option value="malo">Mal estado (rojo)</option>
+                </select>
+            </div>
+            <button class="btn btn-sm w-100 fw-bold" id="btnApplyFijo" onclick="applyFijo()"
+                    style="background:#1E293B; color:#fff; border:none; border-radius:10px;" disabled>
+                <i class="bi bi-check-lg"></i> Aplicar Ap. Fijo
+            </button>
+        </div>
+
+
+        <div id="panelRemovible" class="sub-panel">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span style="font-size:18px;"></span>
+                <div>
+                    <div class="fw-bold small">Ap. Ortodóntico Removible</div>
+                    <div class="text-muted" style="font-size:11px;">Norma 1.2 — Zigzag</div>
+                </div>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label small fw-semibold mb-1">Desde</label>
+                    <div id="remStartDisplay" class="form-control form-control-sm text-center fw-bold"
+                         style="background:#F8FAFC; color:#94A3B8;">—</div>
+                </div>
+                <div class="col-6">
+                    <label class="form-label small fw-semibold mb-1">Hasta</label>
+                    <div id="remEndDisplay" class="form-control form-control-sm text-center fw-bold"
+                         style="background:#F8FAFC; color:#94A3B8;">—</div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold mb-1">Estado</label>
+                <select id="remEstadoSelect" class="form-select form-select-sm">
+                    <option value="bueno">Buen estado (azul)</option>
+                    <option value="malo">Mal estado (rojo)</option>
+                </select>
+            </div>
+            <button class="btn btn-sm w-100 fw-bold" id="btnApplyRem" onclick="applyRemovible()"
+                    style="background:#1E293B; color:#fff; border:none; border-radius:10px;" disabled>
+                <i class="bi bi-check-lg"></i> Aplicar Ap. Removible
+            </button>
+        </div>
+
+
+        <div id="panelRango" class="sub-panel">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span style="font-size:18px;">↔</span>
+                <div>
+                    <div class="fw-bold small">Condiciones de Rango</div>
+                    <div class="text-muted" style="font-size:11px;">Selecciona 2 dientes</div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold mb-1">Condición</label>
+                <select id="rangoConditionSelect" class="form-select form-select-sm">
+                    <option value="">— Seleccionar —</option>
+                    <option value="DIASTEMA">Diastema (1.7)</option>
+                    <option value="EDENTULO_TOTAL">Edéntulo Total (1.14)</option>
+                    <option value="MIGRACION">Migración (1.22)</option>
+                    <option value="PROTESIS_REMOVIBLE">Prótesis Removible (1.25)</option>
+                    <option value="PROTESIS_TOTAL">Prótesis Total (1.26)</option>
+                    <option value="GEMINACION_FUSION">Geminación/Fusión (1.16)</option>
+                    <option value="SUPERNUMERARIO">Supernumerario (1.31)</option>
+                    <option value="TRANSPOSICION">Transposición (1.32)</option>
+                </select>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label small fw-semibold mb-1">Desde</label>
+                    <div id="rangoStartDisplay" class="form-control form-control-sm text-center fw-bold"
+                         style="background:#F8FAFC; color:#94A3B8;">—</div>
+                </div>
+                <div class="col-6">
+                    <label class="form-label small fw-semibold mb-1">Hasta</label>
+                    <div id="rangoEndDisplay" class="form-control form-control-sm text-center fw-bold"
+                         style="background:#F8FAFC; color:#94A3B8;">—</div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold mb-1">Estado</label>
+                <select id="rangoEstadoSelect" class="form-select form-select-sm">
+                    <option value="bueno">Buen estado (azul)</option>
+                    <option value="malo">Mal estado (rojo)</option>
+                </select>
+            </div>
+            <button class="btn btn-sm w-100 fw-bold" id="btnApplyRango" onclick="applyRangoGeneral()"
+                    style="background:#1E293B; color:#fff; border:none; border-radius:10px;" disabled>
+                <i class="bi bi-check-lg"></i> Aplicar Condición
+            </button>
+        </div>
+
+    </div>
+</div>
+
+            </div>
+
+
+            <div class="odontogram-wrapper">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fw-bold small">
+                        <i class="bi bi-clipboard2-pulse" style="color:#E83E8C;"></i> Plan de Tratamiento
+                    </span>
+                    <span class="badge bg-secondary rounded-pill" id="treatmentCount">0</span>
+                </div>
+                <div class="table-responsive" style="max-height:320px; overflow-y:auto;">
+                    <table class="table table-sm mb-0 treatment-table">
+                        <thead>
+                            <tr><th>Diente</th><th>Condición</th><th>Sup.</th><th>Nota</th><th>Fecha</th><th></th></tr>
+                        </thead>
+                        <tbody id="treatmentBody">
+                            <tr id="treatmentEmpty">
+                                <td colspan="6" class="text-center text-muted py-3" style="font-size:12px;">
+                                    Sin hallazgos registrados
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div class="modal fade" id="noteModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0" style="border-radius:16px; overflow:hidden;">
+                        <div class="modal-header py-2" style="background:#1E293B;">
+                            <h6 class="modal-title text-white small mb-0">
+                                <i class="bi bi-chat-left-text me-1"></i>
+                                Nota — Diente <span id="noteModalToothCode"></span>
+                                <span class="ms-2 badge bg-light text-dark" style="font-size:10px;" id="noteModalCondition"></span>
+                            </h6>
+                            <button type="button" class="btn-close btn-close-white btn-sm" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-3">
+                            <div class="note-modal-body" id="noteModalContent"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <th:block layout:fragment="scripts">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            const PATIENT_ID = /*[[${patient.idPatient}]]*/ 0;
+            /*]]>*/
+        </script>
+        <script th:src="@{/js/odontogram.js}"></script>
+    </th:block>
+
+</body>
+</html>

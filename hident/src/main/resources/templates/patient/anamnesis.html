@@ -1,0 +1,359 @@
+<div th:fragment="tab-anamnesis" id="tab-anamnesis" class="tab-pane fade">
+
+
+    <div th:if="${anamnesis.idAnamnesis != null}" id="anamnesisView">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom d-flex align-items-center gap-3 py-3 px-4 rounded-top-4">
+                <div class="rounded-3 d-flex align-items-center justify-content-center"
+                    style="width:40px;height:40px;background:#FAF5FF;">
+                    <i class="bi bi-heart-pulse" style="color:#7C3AED;"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-bold">Anamnesis</h6>
+                    <small class="text-muted" th:if="${anamnesis.updatedAt}"
+                        th:text="'Actualizada: ' + ${#temporals.format(anamnesis.updatedAt, 'dd/MM/yyyy HH:mm')}"></small>
+                </div>
+                <button type="button" class="btn btn-sm btn-hident ms-auto" onclick="toggleAnamnesisMode()">
+                    <i class="bi bi-pencil"></i> Editar
+                </button>
+            </div>
+            <div class="card-body p-4">
+
+
+                <h6 class="text-uppercase small fw-bold text-danger mb-2" style="letter-spacing:.5px;">Antecedentes
+                    Médicos</h6>
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-4">
+                        <div class="check-item" th:classappend="${anamnesis.hypertension} ? 'active'"><span
+                                th:text="${anamnesis.hypertension} ? '' : ''"></span> Hipertensión</div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="check-item" th:classappend="${anamnesis.diabetes} ? 'active'"><span
+                                th:text="${anamnesis.diabetes} ? '' : ''"></span> Diabetes</div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="check-item" th:classappend="${anamnesis.heartDisease} ? 'active'"><span
+                                th:text="${anamnesis.heartDisease} ? '' : ''"></span> Cardiopatía</div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="check-item" th:classappend="${anamnesis.hepatitis} ? 'active'"><span
+                                th:text="${anamnesis.hepatitis} ? '' : ''"></span> Hepatitis</div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="check-item" th:classappend="${anamnesis.hiv} ? 'active'"><span
+                                th:text="${anamnesis.hiv} ? '' : ''"></span> VIH / SIDA</div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="check-item" th:classappend="${anamnesis.tuberculosis} ? 'active'"><span
+                                th:text="${anamnesis.tuberculosis} ? '' : ''"></span> Tuberculosis</div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="check-item" th:classappend="${anamnesis.asthma} ? 'active'"><span
+                                th:text="${anamnesis.asthma} ? '' : ''"></span> Asma</div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="check-item" th:classappend="${anamnesis.epilepsy} ? 'active'"><span
+                                th:text="${anamnesis.epilepsy} ? '' : ''"></span> Epilepsia</div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="check-item" th:classappend="${anamnesis.kidneyDisease} ? 'active'"><span
+                                th:text="${anamnesis.kidneyDisease} ? '' : ''"></span> Enf. Renal</div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="check-item" th:classappend="${anamnesis.bleedingDisorders} ? 'active'"><span
+                                th:text="${anamnesis.bleedingDisorders} ? '' : ''"></span> Sangrado</div>
+                    </div>
+                </div>
+                <div th:if="${anamnesis.otherConditions}" class="mb-3">
+                    <dl class="info-item mb-0">
+                        <dt>Otras condiciones</dt>
+                        <dd th:text="${anamnesis.otherConditions}"></dd>
+                    </dl>
+                </div>
+
+
+                <h6 class="text-uppercase small fw-bold text-danger mb-2" style="letter-spacing:.5px;">Medicación Actual
+                </h6>
+                <dl class="info-item mb-3">
+                    <dt>Medicamentos</dt>
+                    <dd th:text="${anamnesis.currentMedications} ?: 'Ninguno registrado'"></dd>
+                </dl>
+
+
+                <h6 class="text-uppercase small fw-bold text-danger mb-2" style="letter-spacing:.5px;">Alergias</h6>
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-3">
+                        <div class="check-item" th:classappend="${anamnesis.allergyPenicillin} ? 'danger'"><span
+                                th:text="${anamnesis.allergyPenicillin} ? '' : ''"></span> Penicilina</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="check-item" th:classappend="${anamnesis.allergyLatex} ? 'danger'"><span
+                                th:text="${anamnesis.allergyLatex} ? '' : ''"></span> Látex</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="check-item" th:classappend="${anamnesis.allergyAnesthesia} ? 'danger'"><span
+                                th:text="${anamnesis.allergyAnesthesia} ? '' : ''"></span> Anestesia</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="check-item" th:classappend="${anamnesis.allergyNsaids} ? 'danger'"><span
+                                th:text="${anamnesis.allergyNsaids} ? '' : ''"></span> AINEs</div>
+                    </div>
+                </div>
+                <div th:if="${anamnesis.otherAllergies}" class="mb-3">
+                    <dl class="info-item mb-0">
+                        <dt>Otras alergias</dt>
+                        <dd th:text="${anamnesis.otherAllergies}"></dd>
+                    </dl>
+                </div>
+
+
+                <h6 class="text-uppercase small fw-bold text-danger mb-2" style="letter-spacing:.5px;">Hábitos</h6>
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-4">
+                        <div class="check-item" th:classappend="${anamnesis.smoker} ? 'warning'"><span
+                                th:text="${anamnesis.smoker} ? '' : ''"></span> Fumador</div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="check-item" th:classappend="${anamnesis.alcohol} ? 'warning'"><span
+                                th:text="${anamnesis.alcohol} ? '' : ''"></span> Alcohol</div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="check-item" th:classappend="${anamnesis.bruxism} ? 'warning'"><span
+                                th:text="${anamnesis.bruxism} ? '' : ''"></span> Bruxismo</div>
+                    </div>
+                </div>
+
+
+                <h6 class="text-uppercase small fw-bold text-danger mb-2" style="letter-spacing:.5px;">Antecedentes
+                    Odontológicos</h6>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <dl class="info-item mb-0">
+                            <dt>Cirugías previas</dt>
+                            <dd th:text="${anamnesis.previousSurgeries} ?: 'Ninguna'"></dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <dl class="info-item mb-0">
+                            <dt>Última visita dental</dt>
+                            <dd th:text="${anamnesis.lastDentalVisit} ?: 'No registrada'"></dd>
+                        </dl>
+                    </div>
+                </div>
+
+
+                <div th:if="${anamnesis.pregnant or anamnesis.breastfeeding}" class="mb-3">
+                    <h6 class="text-uppercase small fw-bold text-danger mb-2" style="letter-spacing:.5px;">Información
+                        Adicional</h6>
+                    <div class="row g-2">
+                        <div class="col-auto" th:if="${anamnesis.pregnant}">
+                            <div class="check-item info"> Embarazada</div>
+                        </div>
+                        <div class="col-auto" th:if="${anamnesis.breastfeeding}">
+                            <div class="check-item info"> Lactancia</div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div th:if="${anamnesis.observations}">
+                    <h6 class="text-uppercase small fw-bold text-danger mb-2" style="letter-spacing:.5px;">Observaciones
+                    </h6>
+                    <dl class="info-item mb-0">
+                        <dt>Observaciones generales</dt>
+                        <dd th:text="${anamnesis.observations}"></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="anamnesisEdit" th:style="${anamnesis.idAnamnesis != null} ? 'display:none' : ''">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom d-flex align-items-center gap-3 py-3 px-4 rounded-top-4">
+                <div class="rounded-3 d-flex align-items-center justify-content-center"
+                    style="width:40px;height:40px;background:#FAF5FF;">
+                    <i class="bi bi-pencil-square" style="color:#7C3AED;"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-bold"
+                        th:text="${anamnesis.idAnamnesis != null} ? 'Editar Anamnesis' : 'Registrar Anamnesis'">
+                        Anamnesis</h6>
+                    <small class="text-muted">Complete o actualice los antecedentes</small>
+                </div>
+                <button type="button" th:if="${anamnesis.idAnamnesis != null}" class="btn btn-sm btn-secondary ms-auto"
+                    onclick="toggleAnamnesisMode()">
+                    <i class="bi bi-x-lg"></i> Cancelar
+                </button>
+            </div>
+            <div class="card-body p-4">
+                <form th:action="@{'/patient/' + ${patient.idPatient} + '/anamnesis'}" method="post">
+
+                    <h6 class="text-uppercase small fw-bold text-danger mb-2" style="letter-spacing:.5px;">Antecedentes
+                        Médicos</h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6 col-md-4">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="hypertension"
+                                    value="true" th:checked="${anamnesis.hypertension}"><label
+                                    class="form-check-label small">Hipertensión</label></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="diabetes"
+                                    value="true" th:checked="${anamnesis.diabetes}"><label
+                                    class="form-check-label small">Diabetes</label></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="heartDisease"
+                                    value="true" th:checked="${anamnesis.heartDisease}"><label
+                                    class="form-check-label small">Cardiopatía</label></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="hepatitis"
+                                    value="true" th:checked="${anamnesis.hepatitis}"><label
+                                    class="form-check-label small">Hepatitis</label></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="hiv"
+                                    value="true" th:checked="${anamnesis.hiv}"><label class="form-check-label small">VIH
+                                    / SIDA</label></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="tuberculosis"
+                                    value="true" th:checked="${anamnesis.tuberculosis}"><label
+                                    class="form-check-label small">Tuberculosis</label></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="asthma"
+                                    value="true" th:checked="${anamnesis.asthma}"><label
+                                    class="form-check-label small">Asma</label></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="epilepsy"
+                                    value="true" th:checked="${anamnesis.epilepsy}"><label
+                                    class="form-check-label small">Epilepsia</label></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="kidneyDisease"
+                                    value="true" th:checked="${anamnesis.kidneyDisease}"><label
+                                    class="form-check-label small">Enf. Renal</label></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="form-check"><input class="form-check-input" type="checkbox"
+                                    name="bleedingDisorders" value="true"
+                                    th:checked="${anamnesis.bleedingDisorders}"><label
+                                    class="form-check-label small">Trastornos sangrado</label></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="hd-label">Otras condiciones</label>
+                        <textarea name="otherConditions" class="hd-input" rows="2"
+                            th:text="${anamnesis.otherConditions}" placeholder="Otras enfermedades..."></textarea>
+                    </div>
+
+                    <h6 class="text-uppercase small fw-bold text-danger mb-2" style="letter-spacing:.5px;">Medicación
+                        Actual</h6>
+                    <div class="mb-3">
+                        <textarea name="currentMedications" class="hd-input" rows="2"
+                            th:text="${anamnesis.currentMedications}"
+                            placeholder="Ej: Metformina 850mg, Losartán 50mg..."></textarea>
+                    </div>
+
+                    <h6 class="text-uppercase small fw-bold text-danger mb-2" style="letter-spacing:.5px;">Alergias</h6>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6 col-md-3">
+                            <div class="form-check"><input class="form-check-input" type="checkbox"
+                                    name="allergyPenicillin" value="true"
+                                    th:checked="${anamnesis.allergyPenicillin}"><label
+                                    class="form-check-label small">Penicilina</label></div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="allergyLatex"
+                                    value="true" th:checked="${anamnesis.allergyLatex}"><label
+                                    class="form-check-label small">Látex</label></div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="form-check"><input class="form-check-input" type="checkbox"
+                                    name="allergyAnesthesia" value="true"
+                                    th:checked="${anamnesis.allergyAnesthesia}"><label
+                                    class="form-check-label small">Anestesia</label></div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="allergyNsaids"
+                                    value="true" th:checked="${anamnesis.allergyNsaids}"><label
+                                    class="form-check-label small">AINEs</label></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <textarea name="otherAllergies" class="hd-input" rows="2" th:text="${anamnesis.otherAllergies}"
+                            placeholder="Otras alergias..."></textarea>
+                    </div>
+
+                    <h6 class="text-uppercase small fw-bold text-danger mb-2" style="letter-spacing:.5px;">Hábitos</h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6 col-md-4">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="smoker"
+                                    value="true" th:checked="${anamnesis.smoker}"><label
+                                    class="form-check-label small">Fumador</label></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="alcohol"
+                                    value="true" th:checked="${anamnesis.alcohol}"><label
+                                    class="form-check-label small">Alcohol</label></div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="bruxism"
+                                    value="true" th:checked="${anamnesis.bruxism}"><label
+                                    class="form-check-label small">Bruxismo</label></div>
+                        </div>
+                    </div>
+
+                    <h6 class="text-uppercase small fw-bold text-danger mb-2" style="letter-spacing:.5px;">Antecedentes
+                        Odontológicos</h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="hd-label">Cirugías previas</label>
+                            <textarea name="previousSurgeries" class="hd-input" rows="2"
+                                th:text="${anamnesis.previousSurgeries}"
+                                placeholder="Extracciones, implantes..."></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="hd-label">Última visita dental</label>
+                            <input type="text" name="lastDentalVisit" class="hd-input"
+                                th:value="${anamnesis.lastDentalVisit}" placeholder="Ej: Hace 6 meses">
+                        </div>
+                    </div>
+
+                    <h6 class="text-uppercase small fw-bold text-danger mb-2" style="letter-spacing:.5px;">Información
+                        Adicional (Mujeres)</h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-auto">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="pregnant"
+                                    value="true" th:checked="${anamnesis.pregnant}"><label
+                                    class="form-check-label small">Embarazada</label></div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" name="breastfeeding"
+                                    value="true" th:checked="${anamnesis.breastfeeding}"><label
+                                    class="form-check-label small">Lactancia</label></div>
+                        </div>
+                    </div>
+
+                    <h6 class="text-uppercase small fw-bold text-danger mb-2" style="letter-spacing:.5px;">Observaciones
+                    </h6>
+                    <div class="mb-3">
+                        <textarea name="observations" class="hd-input" rows="2" th:text="${anamnesis.observations}"
+                            placeholder="Cualquier observación adicional..."></textarea>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-teal flex-grow-1"><i class="bi bi-check-lg"></i> Guardar
+                            Anamnesis</button>
+                        <button type="button" th:if="${anamnesis.idAnamnesis != null}" class="btn btn-secondary"
+                            onclick="toggleAnamnesisMode()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

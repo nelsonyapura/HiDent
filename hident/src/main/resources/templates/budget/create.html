@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/base}" lang="es">
+<head>
+      <link th:href="@{/css/create.css}" rel="stylesheet">
+</head>
+<body>
+
+    <div layout:fragment="topbar-title">
+        <i class="bi bi-calculator me-1"></i> Crear Presupuesto
+    </div>
+
+    <div layout:fragment="topbar-actions">
+        <a th:href="@{/budgets}" class="btn btn-sm btn-outline-secondary rounded-pill">
+            <i class="bi bi-arrow-left"></i> Volver a lista
+        </a>
+    </div>
+
+    <div layout:fragment="content">
+        <div class="hd-page">
+
+            <div class="row g-3">
+
+
+                <div class="col-lg-5">
+
+
+                    <div class="card border-0 shadow-sm rounded-4 mb-3">
+                        <div class="card-header bg-white border-bottom py-3 px-4 rounded-top-4">
+                            <h6 class="mb-0 fw-bold"><i class="bi bi-file-earmark-text me-1" style="color:#E83E8C;"></i> Datos del Presupuesto</h6>
+                        </div>
+                        <div class="card-body p-4">
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-muted mb-1">Paciente <span class="text-danger">*</span></label>
+                                <div id="patientSearchBox">
+                                    <input type="text" id="patientSearchInput" class="form-control form-control-sm"
+                                           placeholder="Buscar por nombre o DNI..." autocomplete="off"
+                                           oninput="searchPatientHandler(this.value)">
+                                    <div id="patientResults" class="search-results mt-1" style="display:none;"></div>
+                                </div>
+                                <div id="selectedPatientBox" class="selected-patient mt-2" style="display:none;">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <div class="fw-semibold small" id="selectedPatientName">Paciente</div>
+                                            <small class="text-muted" id="selectedPatientDni">DNI</small>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="clearPatient()">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold text-muted mb-1">Nombre presupuesto</label>
+                                    <input type="text" id="budgetName" class="form-control form-control-sm"
+                                           placeholder="Opcional...">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold text-muted mb-1">Doctor responsable</label>
+                                    <input type="text" id="doctorName" class="form-control form-control-sm"
+                                           th:value="${doctorName}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-header bg-white border-bottom py-3 px-4 rounded-top-4 d-flex align-items-center justify-content-between">
+                            <h6 class="mb-0 fw-bold"><i class="bi bi-plus-circle me-1" style="color:#0F766E;"></i> Agregar servicios</h6>
+                            <button class="btn btn-sm btn-outline-teal rounded-pill" onclick="openQuickAddService()" title="Crear nuevo servicio">
+                                <i class="bi bi-plus-lg me-1"></i> Nuevo servicio
+                            </button>
+                        </div>
+                        <div class="card-body p-4">
+
+                            <div class="d-flex gap-2 flex-wrap mb-3" id="categoryTabs"></div>
+
+
+                            <div class="mb-3">
+                                <input type="text" id="serviceSearch" class="form-control form-control-sm"
+                                       placeholder=" Buscar servicio...">
+                            </div>
+
+
+                            <div id="serviceList" class="search-results" style="max-height:300px;">
+                                <div class="text-center py-3 text-muted small">
+                                    Selecciona una categoría o busca un servicio
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-lg-7">
+
+
+                    <div class="card border-0 shadow-sm rounded-4 mb-3">
+                        <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between py-3 px-4 rounded-top-4">
+                            <h6 class="mb-0 fw-bold"><i class="bi bi-list-check me-1" style="color:#0F766E;"></i> Detalle del Presupuesto</h6>
+                            <span class="badge bg-secondary rounded-pill" id="itemCount">0</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0 items-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Diente</th>
+                                            <th>Cant.</th>
+                                            <th>Mon.</th>
+                                            <th>Precio Unit.</th>
+                                            <th>Dcto.</th>
+                                            <th>Subtotal</th>
+                                            <th>Comentario</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itemsBody">
+                                        <tr id="emptyRow">
+                                            <td colspan="9" class="text-center text-muted py-4" style="font-size:13px;">
+                                                <i class="bi bi-search" style="font-size:1.5rem; opacity:.3;"></i>
+                                                <p class="mt-2 mb-0">Agrega servicios o productos</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+
+                            <div class="d-flex justify-content-end align-items-center gap-3 p-3 border-top">
+                                <span class="fw-semibold text-muted">TOTAL:</span>
+                                <span class="budget-total" id="budgetTotal">S/ 0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="card border-0 shadow-sm rounded-4 mb-3">
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-muted mb-1">Nota para el paciente</label>
+                                    <textarea id="patientNote" class="form-control form-control-sm" rows="3"
+                                              placeholder="Visible para el paciente..."></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-muted mb-1">Nota interna</label>
+                                    <textarea id="internalNote" class="form-control form-control-sm" rows="3"
+                                              placeholder="Solo visible para el equipo..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a th:href="@{/budgets}" class="btn btn-secondary">Cancelar</a>
+                        <button class="btn btn-teal px-4" onclick="confirmBudget()">
+                            <i class="bi bi-check-lg"></i> Confirmar Presupuesto
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="quickServiceModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 rounded-4 shadow">
+                    <div class="modal-header border-0 pb-0">
+                        <h6 class="modal-title fw-bold">
+                            <i class="bi bi-plus-circle me-1" style="color:#0F766E;"></i> Nuevo Servicio
+                        </h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small mb-3">El servicio se guardará en el catálogo y se agregará al presupuesto actual.</p>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-muted mb-1">Categoría <span class="text-danger">*</span></label>
+                            <select id="qsCategory" class="form-select form-select-sm">
+                                <option value="">— Seleccionar —</option>
+                                <option value="ODONTOLOGIA_GENERAL">Odontología General</option>
+                                <option value="ORTODONCIA">Ortodoncia</option>
+                                <option value="EXTRACCION">Extracción</option>
+                                <option value="ENDODONCIA">Endodoncia</option>
+                                <option value="REHABILITACION">Rehabilitación</option>
+                                <option value="IMPLANTES">Implantes Dentales</option>
+                                <option value="PRODUCTOS">Productos</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-muted mb-1">Nombre <span class="text-danger">*</span></label>
+                            <input type="text" id="qsName" class="form-control form-control-sm"
+                                   placeholder="Ej: Sellantes" maxlength="200">
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-8">
+                                <label class="form-label small fw-semibold text-muted mb-1">Precio <span class="text-danger">*</span></label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text" id="qsCurrSymbol">S/</span>
+                                    <input type="number" id="qsPrice" class="form-control"
+                                           step="0.01" min="0" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small fw-semibold text-muted mb-1">Moneda</label>
+                                <select id="qsCurrency" class="form-select form-select-sm"
+                                        onchange="document.getElementById('qsCurrSymbol').textContent = this.value === 'USD' ? 'US$' : 'S/'">
+                                    <option value="PEN">PEN</option>
+                                    <option value="USD">USD</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="qsAddToBudget" checked>
+                            <label class="form-check-label small" for="qsAddToBudget">
+                                Agregar automáticamente al presupuesto actual
+                            </label>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-teal flex-fill btn-sm" onclick="saveQuickService()">
+                                <i class="bi bi-check-lg me-1"></i> Crear y agregar
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <th:block layout:fragment="scripts">
+    <script th:src="@{/js/create.js}"></script>
+    </th:block>
+
+</body>
+</html>

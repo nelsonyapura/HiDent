@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/base}" lang="es">
+<head>
+    <title>Registro Paciente</title>
+    <link th:href="@{/css/home.css}" rel="stylesheet">
+</head>
+<body>
+
+    <div layout:fragment="topbar-title">
+        <i class="bi bi-house-door me-1"></i> Inicio de Registro
+    </div>
+
+    <div layout:fragment="content">
+        <div class="home-wrapper">
+
+            <div class="register-card card">
+
+
+                <div class="register-header">
+                    <div class="register-header-icon">
+                        <i class="bi bi-person-plus-fill"></i>
+                    </div>
+                    <div>
+                        <h4>Registrar Nuevo Paciente</h4>
+                        <p>Completa el formulario para agregar un paciente al sistema</p>
+                    </div>
+                    <div class="ms-auto d-none d-md-flex">
+                        <span class="hint-badge">
+                            <i class="bi bi-search me-1"></i>
+                            Usa el buscador del menú para encontrar pacientes
+                        </span>
+                    </div>
+                </div>
+
+
+                <div class="register-body">
+                    <form th:action="@{/home/register}" method="post">
+
+
+                        <div class="section-divider section-personal">
+                            <div class="section-icon"><i class="bi bi-person-fill"></i></div>
+                            <span class="section-text">Datos Personales</span>
+                            <div class="section-line"></div>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-2 col-sm-6">
+                                <label class="field-label">DNI <span class="required">*</span></label>
+                                <input type="text" name="dni" class="form-input"
+                                       maxlength="8" required pattern="\d{8}" placeholder="12345678"
+                                       oninput="this.value=this.value.replace(/\D/g,'')">
+                            </div>
+                            <div class="col-md-2 col-sm-6">
+                                <label class="field-label">Género</label>
+                                <select name="gender" class="form-input">
+                                    <option value="">— Seleccionar</option>
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Femenino</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <label class="field-label">Fecha de Nacimiento</label>
+                                <input type="date" name="birthDate" id="birthDateInput"
+                                       class="form-input" onchange="calcAge()">
+                            </div>
+                            <div class="col-md-2 col-sm-6">
+                                <label class="field-label">Edad</label>
+                                <div class="input-suffix">
+                                    <input type="number" name="age" id="ageInput"
+                                           class="form-input" min="0" max="150" placeholder="—">
+                                    <span class="suffix">años</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <label class="field-label">Teléfono</label>
+                                <input type="text" name="phone" class="form-input"
+                                       maxlength="20" placeholder="999 999 999">
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-4">
+                                <label class="field-label">Nombres <span class="required">*</span></label>
+                                <input type="text" name="firstName" class="form-input"
+                                       required placeholder="Nombres completos">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="field-label">Apellidos <span class="required">*</span></label>
+                                <input type="text" name="lastName" class="form-input"
+                                       required placeholder="Apellidos completos">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="field-label">Email</label>
+                                <input type="email" name="email" class="form-input"
+                                       placeholder="correo@ejemplo.com">
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-3 col-sm-6">
+                                <label class="field-label">Tel. Emergencia</label>
+                                <input type="text" name="emergencyPhone" class="form-input"
+                                       maxlength="20" placeholder="999 999 999">
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <label class="field-label">Distrito</label>
+                                <input type="text" name="district" class="form-input"
+                                       placeholder="Ej: Miraflores">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="field-label">Dirección</label>
+                                <input type="text" name="address" class="form-input"
+                                       placeholder="Av. / Calle / Jr.">
+                            </div>
+                        </div>
+
+
+                        <div class="minor-card mb-3" onclick="document.getElementById('isMinorCheck').click()">
+                            <div class="minor-icon"><i class="bi bi-person-heart"></i></div>
+                            <div class="flex-grow-1">
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="checkbox" id="isMinorCheck"
+                                           onchange="toggleGuardian()" onclick="event.stopPropagation()"
+                                           style="width:18px;height:18px;margin-top:2px;">
+                                    <label class="form-check-label fw-semibold" for="isMinorCheck"
+                                           style="cursor:pointer;font-size:14px;color:#1E293B;margin-left:4px;">
+                                        El paciente es menor de edad
+                                    </label>
+                                    <div style="font-size:12px;color:#64748B;margin-left:28px;margin-top:1px;">
+                                        Se habilitarán los campos del apoderado / tutor
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="guardianSection" class="d-none mb-3">
+                            <div class="section-divider section-guardian" style="margin-top:0;">
+                                <div class="section-icon"><i class="bi bi-people-fill"></i></div>
+                                <span class="section-text">Apoderado / Tutor</span>
+                                <div class="section-line"></div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <label class="field-label">Nombre del Apoderado</label>
+                                    <input type="text" name="guardianName" class="form-input"
+                                           placeholder="Nombre completo del apoderado">
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="field-label">Teléfono del Apoderado</label>
+                                    <input type="text" name="guardianPhone" class="form-input"
+                                           maxlength="20" placeholder="999 999 999">
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="section-divider section-medical">
+                            <div class="section-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+                            <span class="section-text">Información Médica e Historial</span>
+                            <div class="section-line"></div>
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-4">
+                                <label class="field-label">Alergias</label>
+                                <textarea name="allergies" class="form-input" rows="2"
+                                          placeholder="Ej: Penicilina, Látex, AINE..."></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="field-label">Notas Médicas</label>
+                                <textarea name="medicalNotes" class="form-input" rows="2"
+                                          placeholder="Antecedentes, medicamentos actuales..."></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="field-label">Historial Odontológico</label>
+                                <textarea name="dentalHistory" class="form-input" rows="2"
+                                          placeholder="Tratamientos previos, cirugías, aparatología..."></textarea>
+                                <div class="field-hint">
+                                    <i class="bi bi-info-circle"></i>
+                                    Aparecerá en la anamnesis del paciente
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <button type="submit" class="btn-submit">
+                            <i class="bi bi-person-plus-fill" style="font-size:20px;"></i>
+                            Registrar Paciente
+                        </button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+    <script th:src="@{/js/home.js}"></script>
+    </th:block>
+
+</body>
+</html>

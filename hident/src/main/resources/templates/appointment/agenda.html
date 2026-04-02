@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/base}" lang="es">
+<head>
+    <title>Agenda</title>
+    <link th:href="@{/css/agenda.css}" rel="stylesheet">
+</head>
+<body>
+
+    <div layout:fragment="topbar-title"><i class="bi bi-calendar-week me-1"></i> Agenda</div>
+
+
+    <div layout:fragment="content">
+        <div class="calendar-wrapper">
+            <div class="cal-toolbar">
+                <button type="button" class="btn-nav" onclick="navigate(-1)" title="Anterior"><i class="bi bi-chevron-left"></i></button>
+                <button type="button" class="btn-today" onclick="goToday()">Hoy</button>
+                <button type="button" class="btn-nav" onclick="navigate(1)" title="Siguiente"><i class="bi bi-chevron-right"></i></button>
+                <span class="week-range" id="weekRange">Cargando...</span>
+                <div class="ms-auto d-flex align-items-center gap-2 flex-wrap">
+                    <select id="filterStatus" class="filter-select" onchange="loadAppointments()">
+                        <option value="TODOS">Todos</option>
+                        <option value="PROGRAMADA">Programada</option>
+                        <option value="CONFIRMADA">Confirmada</option>
+                        <option value="ATENDIDA">Atendida</option>
+                        <option value="NO_ASISTIO">No asistió</option>
+                        <option value="CANCELADA">Cancelada</option>
+                    </select>
+                    <div class="view-toggle btn-group">
+                        <button type="button" class="btn btn-sm" id="btnMonth" onclick="setView('month')">Mes</button>
+                        <button type="button" class="btn btn-sm active" id="btnWeek" onclick="setView('week')">Semana</button>
+                        <button type="button" class="btn btn-sm" id="btnDay" onclick="setView('day')">Día</button>
+                    </div>
+                    <button type="button" class="btn-new-appt" onclick="openCreateModal()"><i class="bi bi-plus-lg me-1"></i> Nueva cita</button>
+                </div>
+            </div>
+            <div id="weekDayView">
+                <div class="cal-header-row" id="calHeader"></div>
+                <div class="cal-body" id="calBody"></div>
+            </div>
+            <div id="monthView" style="display:none;">
+                <div class="month-grid" id="monthHeader"></div>
+                <div class="month-grid" id="monthBody"></div>
+            </div>
+            <div class="cal-legend">
+                <span><span class="dot" style="background:#14B8A6;"></span> Programada</span>
+                <span><span class="dot" style="background:#10B981;"></span> Confirmada</span>
+                <span><span class="dot" style="background:#3B82F6;"></span> Atendida</span>
+                <span><span class="dot" style="background:#F59E0B;"></span> No asistió</span>
+                <span><span class="dot" style="background:#E83E8C;"></span> Cancelada</span>
+            </div>
+        </div>
+
+
+
+
+        <div class="modal fade" id="appointmentModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header pb-0">
+                        <h6 class="modal-title fw-bold" id="modalTitle"><i class="bi bi-calendar-plus me-2" style="color:#14B8A6;"></i>Nueva Cita</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body pt-2">
+                        <input type="hidden" id="editId">
+                        <div class="mb-3 position-relative">
+                            <label class="form-label small fw-semibold mb-1">Paciente <span style="color:#E83E8C;">*</span></label>
+                            <input type="text" id="patientSearch" class="form-control form-control-sm" placeholder="Buscar por nombre o DNI..." autocomplete="off" oninput="searchPatients(this.value)">
+                            <input type="hidden" id="selectedPatientId">
+                            <div id="patientResults" class="patient-search-results"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold mb-1">Fecha <span style="color:#E83E8C;">*</span></label>
+                            <input type="date" id="apptDate" class="form-control form-control-sm">
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6"><label class="form-label small fw-semibold mb-1">Hora inicio <span style="color:#E83E8C;">*</span></label><input type="time" id="apptStart" class="form-control form-control-sm"></div>
+                            <div class="col-6"><label class="form-label small fw-semibold mb-1">Hora fin <span style="color:#E83E8C;">*</span></label><input type="time" id="apptEnd" class="form-control form-control-sm"></div>
+                        </div>
+                        <div class="mb-3"><label class="form-label small fw-semibold mb-1">Motivo</label><input type="text" id="apptReason" class="form-control form-control-sm" placeholder="Ej: Limpieza dental, Control..."></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold mb-1">Doctor / Profesional</label><input type="text" id="apptAssigned" class="form-control form-control-sm" placeholder="Nombre del profesional"></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold mb-1">Notas</label><textarea id="apptNotes" class="form-control form-control-sm" rows="2" placeholder="Notas adicionales..."></textarea></div>
+                        <div id="modalError" class="alert alert-danger py-2 small d-none"></div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0 d-flex gap-2">
+                        <button type="button" class="btn btn-secondary flex-fill" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-teal flex-fill" onclick="saveAppointment()"><i class="bi bi-check-lg"></i> <span id="btnSaveText">Guardar</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="viewModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header pb-0">
+                        <h6 class="modal-title fw-bold"><i class="bi bi-calendar-check me-2" style="color:#14B8A6;"></i>Detalle de Cita</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="viewBody"></div>
+                    <div id="viewError" class="alert alert-danger py-2 small d-none mx-3"></div>
+                    <div class="modal-footer border-0 pt-0 flex-wrap gap-1" id="viewActions"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <th:block layout:fragment="scripts">
+    <script th:src="@{/js/agenda.js}"></script>
+    </th:block>
+
+</body>
+</html>

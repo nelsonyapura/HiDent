@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/base}" lang="es">
+<head>
+    <title>Proformas</title>
+    <link th:href="@{/css/proforma.css}" rel="stylesheet">
+</head>
+<body>
+
+    <div layout:fragment="topbar-title">
+        <i class="bi bi-clipboard-check me-1"></i> Proformas
+    </div>
+
+    <div layout:fragment="topbar-actions">
+        <a th:href="@{/proformas/create}" class="btn btn-sm btn-hident rounded-pill">
+            <i class="bi bi-plus-lg me-1"></i> Nueva Proforma
+        </a>
+    </div>
+
+    <div layout:fragment="content">
+        <div class="hd-page">
+
+
+            <div class="pf-toolbar">
+                <div class="pf-search-wrap">
+                    <i class="bi bi-search pf-search-icon"></i>
+                    <input type="text" id="pfSearch" class="pf-search"
+                           placeholder="Buscar por paciente o DNI..." autocomplete="off"
+                           oninput="searchProformas(this.value)">
+                </div>
+                <div class="pf-filter-wrap">
+                    <select id="pfStatusFilter" class="pf-filter" onchange="filterByStatus(this.value)">
+                        <option value="ALL">Todos los estados</option>
+                        <option value="ACTIVA">Activas</option>
+                        <option value="COMPLETADA">Completadas</option>
+                        <option value="CANCELADA">Canceladas</option>
+                    </select>
+                </div>
+                <div class="pf-stats" id="pfStats"></div>
+            </div>
+
+
+            <div id="pfListContainer"></div>
+
+
+            <div class="pf-empty" id="pfEmpty" style="display:none;">
+                <i class="bi bi-clipboard-x" style="font-size:40px;color:#94a3b8;"></i>
+                <p>No se encontraron proformas</p>
+                <a th:href="@{/proformas/create}" class="btn btn-sm btn-hident rounded-pill">
+                    <i class="bi bi-plus-lg me-1"></i> Crear primera proforma
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/proforma-list.js}"></script>
+    </th:block>
+
+</body>
+</html>

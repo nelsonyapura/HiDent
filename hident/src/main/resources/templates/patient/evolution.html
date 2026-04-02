@@ -1,0 +1,405 @@
+<div th:fragment="tab-notas" id="tab-notas" class="tab-pane fade">
+
+    <div class="hd-card mb-3">
+        <div class="hd-card-header">
+            <div class="hd-card-header-icon"><i class="bi bi-plus-lg"></i></div>
+            <div><h6>Nueva Nota de Evolución</h6><small>Registrar atención de esta visita</small></div>
+        </div>
+        <div class="hd-card-body">
+            <form th:action="@{'/patient/' + ${patient.idPatient} + '/note'}" method="post" id="evolutionForm">
+                <div class="row g-2 mb-2">
+                    <div class="col-md-8">
+                        <label class="hd-label">Motivo de consulta <span class="req">*</span></label>
+                        <input type="text" name="reason" class="hd-input" required placeholder="Ej: Dolor en molar inferior derecho">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="hd-label">Pieza dental</label>
+                        <input type="text" name="toothNumber" class="hd-input" placeholder="Ej: 36, 18" maxlength="10">
+                    </div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6">
+                        <label class="hd-label">Diagnóstico</label>
+                        <textarea name="diagnosis" class="hd-input" rows="2" placeholder="Diagnóstico clínico..."></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="hd-label">Tratamiento realizado</label>
+                        <textarea name="treatmentDone" class="hd-input" rows="2" placeholder="Procedimiento realizado..."></textarea>
+                    </div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-12">
+                        <label class="hd-label">Observaciones</label>
+                        <textarea name="observations" class="hd-input" rows="2" placeholder="Observaciones..."></textarea>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+
+                    <div class="col-md-6">
+                        <div style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:14px 16px;height:100%;">
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                                <div style="width:28px;height:28px;border-radius:8px;background:#F0FDFA;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <i class="bi bi-clipboard2-pulse" style="color:#0D9488;font-size:13px;"></i>
+                                </div>
+                                <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#0D9488;">Indicaciones al paciente</span>
+                            </div>
+                            <textarea name="indications" class="hd-input" rows="5"
+                                      placeholder="Ej: Tomar ibuprofeno 400mg cada 8 horas por 3 días.&#10;No consumir alimentos calientes por 2 horas..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div style="background:#F0FDFA;border:1.5px solid #CCFBF1;border-radius:12px;padding:14px 16px;height:100%;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#14B8A6,#0D9488);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                        <i class="bi bi-calendar-plus" style="color:#fff;font-size:13px;"></i>
+                                    </div>
+                                    <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#115E59;">Agendar próxima cita</span>
+                                </div>
+                                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;font-weight:600;color:#0F766E;">
+                                    <input type="checkbox" id="enableNextAppt" name="scheduleNextAppt" value="true"
+                                           onchange="toggleNextApptFields(this.checked)"
+                                           style="width:16px;height:16px;accent-color:#0D9488;">
+                                    Agendar
+                                </label>
+                            </div>
+                            <div id="nextApptFields" style="opacity:.4;pointer-events:none;transition:all .2s;">
+                                <div class="row g-2 mb-2">
+                                    <div class="col-7">
+                                        <label class="hd-label">Fecha <span class="req">*</span></label>
+                                        <input type="date" name="nextApptDate" id="nextApptDate" class="hd-input" onchange="checkApptConflict()">
+                                    </div>
+                                    <div class="col-5">
+                                        <label class="hd-label">Doctor</label>
+                                        <input type="text" name="nextApptDoctor" class="hd-input" placeholder="Dr. ..." style="font-size:12.5px;">
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <label class="hd-label">Hora inicio <span class="req">*</span></label>
+                                        <input type="time" name="nextApptStart" id="nextApptStart" class="hd-input" value="09:00" onchange="checkApptConflict()">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="hd-label">Hora fin <span class="req">*</span></label>
+                                        <input type="time" name="nextApptEnd" id="nextApptEnd" class="hd-input" value="09:30" onchange="checkApptConflict()">
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="hd-label">Motivo de próxima cita</label>
+                                    <input type="text" name="nextApptReason" class="hd-input" placeholder="Ej: Control, Continuar tratamiento...">
+                                </div>
+                                <div id="apptConflictAlert" style="display:none;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:8px 12px;font-size:11.5px;color:#92400E;">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                    <span id="apptConflictMsg">Ya existe una cita en ese horario</span>
+                                </div>
+                                <div id="apptOkAlert" style="display:none;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:8px 12px;font-size:11.5px;color:#059669;">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Horario disponible
+                                </div>
+                            </div>
+                            <div id="nextApptHint" style="text-align:center;padding:12px 0 4px;font-size:11.5px;color:#94A3B8;">
+                                <i class="bi bi-info-circle me-1"></i> Marque "Agendar" para registrar la cita en la agenda
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-teal w-100">
+                    <i class="bi bi-plus-circle"></i> Registrar Nota
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="hd-card">
+        <div class="hd-card-header">
+            <div class="hd-card-header-icon"><i class="bi bi-clock-history"></i></div>
+            <div>
+                <h6>Historial de Evolución</h6>
+                <small th:text="${notesCount + ' nota(s) registrada(s)'}">0 notas</small>
+            </div>
+        </div>
+        <div class="hd-card-body">
+
+            <div th:if="${!notes.isEmpty()}" class="evo-timeline">
+                <div th:each="note : ${notes}" class="evo-item">
+
+                    <div class="evo-rail">
+                        <div class="evo-dot"></div>
+                        <div class="evo-line"></div>
+                    </div>
+
+                    <div class="evo-card">
+
+                        <div class="evo-header">
+                            <div class="evo-meta">
+                                <span class="evo-date">
+                                    <i class="bi bi-calendar3"></i>
+                                    <span th:text="${#temporals.format(note.noteDate, 'dd/MM/yyyy')}"></span>
+                                </span>
+                                <span class="evo-time">
+                                    <i class="bi bi-clock"></i>
+                                    <span th:text="${#temporals.format(note.noteDate, 'HH:mm')}"></span>
+                                </span>
+                                <span th:if="${note.toothNumber}" class="evo-tooth">
+                                    <i class="bi bi-circle-fill" style="font-size:6px;"></i>
+                                    Pieza <span th:text="${note.toothNumber}"></span>
+                                </span>
+                            </div>
+                            <div class="evo-actions">
+
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-secondary py-0 px-2"
+                                        th:onclick="'openEditNoteModal(' + ${note.idNote} + ', this)'"
+                                        th:data-reason="${note.reason}"
+                                        th:data-diagnosis="${note.diagnosis}"
+                                        th:data-treatment="${note.treatmentDone}"
+                                        th:data-tooth="${note.toothNumber}"
+                                        th:data-observations="${note.observations}"
+                                        th:data-indications="${note.indications}"
+                                        th:data-next="${note.nextAppointment}"
+                                        title="Editar nota">
+                                    <i class="bi bi-pencil" style="font-size:11px;"></i>
+                                </button>
+
+                                <form th:action="@{'/patient/' + ${patient.idPatient} + '/note/' + ${note.idNote} + '/delete'}"
+                                      method="post" style="display:inline;"
+                                      onsubmit="return confirm('¿Eliminar esta nota? Esta acción no se puede deshacer.')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Eliminar nota">
+                                        <i class="bi bi-trash3" style="font-size:11px;"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="evo-reason" th:text="${note.reason}">Motivo</div>
+
+                        <div class="evo-fields">
+                            <div th:if="${note.diagnosis}" class="evo-field">
+                                <span class="evo-field-label"><i class="bi bi-clipboard2-pulse me-1"></i>Diagnóstico</span>
+                                <span th:text="${note.diagnosis}"></span>
+                            </div>
+                            <div th:if="${note.treatmentDone}" class="evo-field">
+                                <span class="evo-field-label"><i class="bi bi-bandaid me-1"></i>Tratamiento</span>
+                                <span th:text="${note.treatmentDone}"></span>
+                            </div>
+                            <div th:if="${note.observations}" class="evo-field">
+                                <span class="evo-field-label"><i class="bi bi-eye me-1"></i>Observaciones</span>
+                                <span th:text="${note.observations}"></span>
+                            </div>
+                            <div th:if="${note.indications}" class="evo-field evo-field-teal">
+                                <span class="evo-field-label" style="color:#0D9488;"><i class="bi bi-clipboard-check me-1"></i>Indicaciones</span>
+                                <span th:text="${note.indications}"></span>
+                            </div>
+                            <div th:if="${note.nextAppointment}" class="evo-field">
+                                <span class="evo-field-label"><i class="bi bi-calendar-event me-1"></i>Próxima cita</span>
+                                <span th:text="${note.nextAppointment}"></span>
+                            </div>
+                        </div>
+
+                        <div class="evo-footer">
+                            <span th:if="${note.appointmentScheduled}" class="evo-badge-cita">
+                                <i class="bi bi-calendar-check"></i> Cita agendada automáticamente
+                            </span>
+                            <span th:if="${note.createdBy}" class="evo-author">
+                                <i class="bi bi-person"></i> <span th:text="${note.createdBy}"></span>
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${notes.isEmpty()}" class="hd-empty">
+                <i class="bi bi-journal-text"></i>
+                <h6>Sin notas de evolución</h6>
+                <small>Registre la primera nota usando el formulario de arriba</small>
+            </div>
+        </div>
+    </div>
+
+    
+    <div id="evoMeta" th:data-patient-id="${patient.idPatient}" style="display:none;"></div>
+
+    <div class="modal fade" id="editNoteModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-1" style="background:#F8FAFC;">
+                    <h6 class="modal-title fw-bold">
+                        <i class="bi bi-pencil me-2" style="color:#0D9488;"></i>Editar Nota de Evolución
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editNoteForm" method="post" action="#">
+                    <div class="modal-body pt-3">
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-8">
+                                <label class="hd-label">Motivo de consulta <span class="req">*</span></label>
+                                <input type="text" name="reason" id="editReason" class="hd-input" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="hd-label">Pieza dental</label>
+                                <input type="text" name="toothNumber" id="editTooth" class="hd-input" maxlength="10">
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6">
+                                <label class="hd-label">Diagnóstico</label>
+                                <textarea name="diagnosis" id="editDiagnosis" class="hd-input" rows="2"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="hd-label">Tratamiento realizado</label>
+                                <textarea name="treatmentDone" id="editTreatment" class="hd-input" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-12">
+                                <label class="hd-label">Observaciones</label>
+                                <textarea name="observations" id="editObservations" class="hd-input" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6">
+                                <label class="hd-label">Indicaciones al paciente</label>
+                                <textarea name="indications" id="editIndications" class="hd-input" rows="3"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="hd-label">Próxima cita (texto libre)</label>
+                                <textarea name="nextAppointment" id="editNextAppt" class="hd-input" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-teal rounded-pill">
+                            <i class="bi bi-check-lg me-1"></i>Guardar cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // Leer patientId desde el DOM — no usar th:inline en fragments
+        var _patientId   = parseInt(document.getElementById('evoMeta').dataset.patientId, 10);
+        var _hasConflict = false;
+
+        //  Abrir modal de edición
+        window.openEditNoteModal = function(noteId, btn) {
+            var form = document.getElementById('editNoteForm');
+            form.action = '/patient/' + _patientId + '/note/' + noteId + '/edit';
+
+            document.getElementById('editReason').value       = btn.dataset.reason       || '';
+            document.getElementById('editDiagnosis').value    = btn.dataset.diagnosis    || '';
+            document.getElementById('editTreatment').value    = btn.dataset.treatment    || '';
+            document.getElementById('editTooth').value        = btn.dataset.tooth        || '';
+            document.getElementById('editObservations').value = btn.dataset.observations || '';
+            document.getElementById('editIndications').value  = btn.dataset.indications  || '';
+            document.getElementById('editNextAppt').value     = btn.dataset.next         || '';
+
+            new bootstrap.Modal(document.getElementById('editNoteModal')).show();
+        };
+
+        //  Toggle campos próxima cita
+        window.toggleNextApptFields = function(enabled) {
+            var fields = document.getElementById('nextApptFields');
+            var hint   = document.getElementById('nextApptHint');
+            fields.style.opacity       = enabled ? '1' : '.4';
+            fields.style.pointerEvents = enabled ? 'auto' : 'none';
+            hint.style.display         = enabled ? 'none' : 'block';
+            if (!enabled) {
+                _hasConflict = false;
+                document.getElementById('apptConflictAlert').style.display = 'none';
+                document.getElementById('apptOkAlert').style.display       = 'none';
+            }
+            if (enabled && !document.getElementById('nextApptDate').value) {
+                var d = new Date();
+                d.setDate(d.getDate() + 1);
+                if (d.getDay() === 0) d.setDate(d.getDate() + 1);
+                if (d.getDay() === 6) d.setDate(d.getDate() + 2);
+                document.getElementById('nextApptDate').value = d.toISOString().split('T')[0];
+                checkApptConflict();
+            }
+        };
+
+        //  Bloquear submit si hay conflicto
+        document.getElementById('evolutionForm').addEventListener('submit', function(e) {
+            if (_hasConflict && document.getElementById('enableNextAppt').checked) {
+                e.preventDefault();
+                var el = document.getElementById('apptConflictAlert');
+                el.style.display   = 'block';
+                el.style.animation = 'none';
+                el.offsetHeight;
+                el.style.animation = 'hdShake 0.4s ease';
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+
+        //  Verificar conflicto de horario
+        var _checkTimer = null;
+        window.checkApptConflict = function() {
+            clearTimeout(_checkTimer);
+            _checkTimer = setTimeout(_doCheck, 400);
+        };
+
+        async function _doCheck() {
+            var date  = document.getElementById('nextApptDate').value;
+            var start = document.getElementById('nextApptStart').value;
+            var end   = document.getElementById('nextApptEnd').value;
+            var elConflict = document.getElementById('apptConflictAlert');
+            var elOk       = document.getElementById('apptOkAlert');
+
+            elConflict.style.display = 'none';
+            elOk.style.display       = 'none';
+            _hasConflict = false;
+
+            if (!date || !start || !end) return;
+
+            try {
+                var res = await fetch(
+                    '/api/appointments?start=' + date + '&end=' + date + '&status=TODOS',
+                    { credentials: 'same-origin' }
+                );
+                if (!res.ok) return;
+                var appts = await res.json();
+
+                var sMin = _toMin(start), eMin = _toMin(end);
+                var conflicts = appts
+                    .filter(function(a) { return a.status !== 'CANCELADA'; })
+                    .filter(function(a) {
+                        var aS = _toMin(a.startTime);
+                        var aE = a.endTime ? _toMin(a.endTime) : aS + 30;
+                        return sMin < aE && eMin > aS;
+                    })
+                    .map(function(a) {
+                        return a.patientName + ' (' +
+                            (a.startFormatted || a.startTime) + ' - ' +
+                            (a.endFormatted   || a.endTime)   + ')';
+                    });
+
+                if (conflicts.length) {
+                    _hasConflict = true;
+                    document.getElementById('apptConflictMsg').innerHTML =
+                        '<strong>Ya existe una cita en ese horario:</strong><br>' + conflicts.join('<br>');
+                    elConflict.style.display = 'block';
+                } else {
+                    elOk.style.display = 'block';
+                }
+            } catch(e) { /* silencioso */ }
+        }
+
+        function _toMin(s) {
+            if (!s) return 0;
+            var p = s.split(':');
+            return parseInt(p[0]) * 60 + parseInt(p[1]);
+        }
+
+    })();
+    </script>
+
+</div>

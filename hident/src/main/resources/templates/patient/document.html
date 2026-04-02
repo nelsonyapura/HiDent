@@ -1,0 +1,80 @@
+<div th:fragment="tab-docs" id="tab-docs" class="tab-pane fade">
+
+
+    <div class="hd-card mb-3">
+        <div class="hd-card-header">
+            <div class="hd-card-header-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+            <div><h6>Subir Documento</h6><small>PDF, JPG o PNG — radiografías, exámenes, recetas, fotos clínicas</small></div>
+        </div>
+        <div class="hd-card-body">
+            <form th:action="@{'/patient/' + ${patient.idPatient} + '/document/upload'}" method="post" enctype="multipart/form-data">
+                <div class="hd-upload mb-3">
+                    <i class="bi bi-cloud-arrow-up" style="font-size:2rem;color:#0D9488;"></i>
+                    <p class="small text-muted mt-2 mb-1">PDF, JPG o PNG (máx. 10MB)</p>
+                    <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png" required class="hd-input mx-auto" style="max-width:300px;">
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6"><label class="hd-label">Descripción</label><input type="text" name="description" class="hd-input" placeholder="Ej: Radiografía panorámica"></div>
+                    <div class="col-md-6">
+                        <label class="hd-label">Categoría</label>
+                        <select name="category" class="hd-input">
+                            <option value="RADIOGRAFIA">Radiografía</option>
+                            <option value="EXAMEN">Examen</option>
+                            <option value="RECETA">Receta</option>
+                            <option value="FOTO_CLINICA">Foto Clínica</option>
+                            <option value="OTRO">Otro</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-teal w-100"><i class="bi bi-upload"></i> Subir Documento</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="hd-card">
+        <div class="hd-card-header">
+            <div class="hd-card-header-icon"><i class="bi bi-folder"></i></div>
+            <div><h6>Documentos del Paciente</h6><small th:text="${documentsCount + ' documento(s)'}">0</small></div>
+        </div>
+        <div class="hd-card-body">
+            <div th:if="${!documents.isEmpty()}" class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead>
+                        <tr style="background:#0F766E;">
+                            <th style="color:#000000;font-size:11px;font-weight:600;">Archivo</th>
+                            <th style="color:#000000;font-size:11px;font-weight:600;">Tipo</th>
+                            <th style="color:#000000;font-size:11px;font-weight:600;">Categoría</th>
+                            <th style="color:#000000;font-size:11px;font-weight:600;" class="d-none d-md-table-cell">Tamaño</th>
+                            <th style="color:#000000;font-size:11px;font-weight:600;" class="d-none d-md-table-cell">Fecha</th>
+                            <th style="color:#000000;font-size:11px;font-weight:600;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="doc : ${documents}">
+                            <td>
+                                <div class="fw-semibold" th:text="${doc.fileName}">archivo.pdf</div>
+                                <small th:if="${doc.description}" class="text-muted" th:text="${doc.description}"></small>
+                            </td>
+                            <td><span class="badge bg-secondary-subtle text-secondary rounded-pill" th:text="${doc.fileType}">PDF</span></td>
+                            <td><span class="badge rounded-pill d-none d-md-table-cell text-dark" th:classappend="'doc-cat-' + ${doc.category}" th:text="${doc.category}">OTRO</span></td>
+                            <td class="d-none d-md-table-cell text-muted" th:text="${doc.fileSizeFormatted}">-</td>
+                            <td class="d-none d-md-table-cell text-muted" th:text="${#temporals.format(doc.createdAt, 'dd/MM/yyyy')}"></td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a th:href="@{'/patient/' + ${patient.idPatient} + '/document/' + ${doc.idDocument} + '/download'}" target="_blank" class="btn btn-sm btn-outline-teal py-0 px-2">Ver</a>
+                                    <form th:action="@{'/patient/' + ${patient.idPatient} + '/document/' + ${doc.idDocument} + '/delete'}" method="post" onsubmit="return confirm('¿Eliminar?');"><button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2">Eliminar</button></form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div th:if="${documents.isEmpty()}" class="hd-empty">
+                <i class="bi bi-file-earmark"></i>
+                <h6>Sin documentos</h6>
+                <small>Suba archivos usando el formulario de arriba</small>
+            </div>
+        </div>
+    </div>
+</div>

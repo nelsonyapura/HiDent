@@ -1,5 +1,5 @@
 
-# Hi Dent - Sistema de Gestion para Clinicas Dentales 
+# Hi Dent - Sistema de Gestion 
 
 Sistema web completo para la gestion de clinicas odontologicas. Permite administrar pacientes, historias clinicas, presupuestos, citas y respaldos automaticos. Desarrollado con Java 21, Spring Boot 4, PostgreSQL y Thymeleaf.
 
